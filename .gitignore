@@ -45,3 +45,5 @@ next-env.d.ts
 .gentle-ai/
 memory/
 *.session.md
+CLAUDE.md
+
