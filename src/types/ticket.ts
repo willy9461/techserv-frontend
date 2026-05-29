@@ -116,3 +116,33 @@ export const ESTADO_ORDER: TicketEstado[] = [
   'resuelto',
   'cerrado',
 ]
+// Vista cliente
+export interface MiTicket {
+  id: string
+  titulo: string
+  descripcion: string
+  estado: TicketEstado
+  urgencia: TicketUrgencia
+  createdAt: string
+  tecnico?: {
+    nombre: string
+    especialidad: string
+  }
+  equipo?: {
+    tipo: TipoEquipo
+    marca: string
+    modelo: string
+  }
+}
+export interface MiEquipo {
+  id: string
+  tipo: TipoEquipo
+  marca: string
+  modelo: string
+  nro_serie: string
+  ultimaIntervencion?: {
+    fecha: string
+    descripcion: string
+    estado: TicketEstado
+  }
+}
