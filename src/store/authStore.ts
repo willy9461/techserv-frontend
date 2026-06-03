@@ -3,18 +3,20 @@ import { User } from '@/types/user'
 
 interface AuthState {
   user: User | null
+  token: string | null
   isLoading: boolean
-  setUser: (user: User | null) => void
+  setAuth: (user: User, token: string) => void
   setIsLoading: (isLoading: boolean) => void
-  clearUser: () => void
+  clearAuth: () => void
 }
 
 const useAuthStore = create<AuthState>((set) => ({
   user: null,
+  token: null,
   isLoading: false,
-  setUser: (user) => set({ user }),
+  setAuth: (user, token) => set({ user, token }),
   setIsLoading: (isLoading) => set({ isLoading }),
-  clearUser: () => set({ user: null }),
+  clearAuth: () => set({ user: null, token: null }),
 }))
 
 export default useAuthStore

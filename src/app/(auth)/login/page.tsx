@@ -2,12 +2,12 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { login, getMe } from '@/api/users'
+import { login } from '@/api/users'
 import useAuthStore from '@/store/authStore'
 
 export default function LoginPage() {
   const router = useRouter()
-  const { setUser, setIsLoading, isLoading } = useAuthStore()
+  const { setAuth, setIsLoading, isLoading } = useAuthStore()
 
   const [user, setUserInput] = useState('')
   const [password, setPassword] = useState('')
@@ -19,11 +19,9 @@ export default function LoginPage() {
     setIsLoading(true)
 
     try {
-      await login(user, password)
-      const me = await getMe()
-      setUser(me)
+      const { user: me, access_token } = await login(user, password)
+      setAuth(me, access_token)
 
-      // Redirigir según rol
       const roleRedirects: Record<string, string> = {
         cliente: '/tickets',
         tecnico: '/agenda',
