@@ -1,52 +1,51 @@
-'use client'
+"use client";
 
-import { useState } from 'react'
-import { useRouter } from 'next/navigation'
-import useAuthStore from '@/store/authStore'
-import { login, getMe } from '@/api/users'
+import { useState } from "react";
+import { useRouter } from "next/navigation";
+import useAuthStore from "@/store/authStore";
+import { login, getMe } from "@/api/users";
 
 export default function LoginPage() {
-  const router = useRouter()
-  const { setAuth, setIsLoading, isLoading } = useAuthStore()
+  const router = useRouter();
+  const { setAuth, setIsLoading, isLoading } = useAuthStore();
 
-  const [user, setUserInput] = useState('')
-  const [password, setPassword] = useState('')
-  const [error, setError] = useState('')
+  const [user, setUserInput] = useState("");
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
 
   async function handleSubmit(e: React.FormEvent) {
-    e.preventDefault()
-    setError('')
-    setIsLoading(true)
+    e.preventDefault();
+    setError("");
+    setIsLoading(true);
     try {
-  const { access_token } = await login(user, password)
-  const me = await getMe(access_token)
-  setAuth(me, access_token)
+      const { access_token } = await login(user, password);
+      const me = await getMe(access_token);
+      setAuth(me, access_token);
 
-  const roleRedirects: Record<string, string> = {
-    cliente: '/tickets',
-    tecnico: '/agenda',
-    supervisor: '/dashboard',
-    administrador: '/dashboard',
-    area_administrativa: '/facturacion',
-  }
+      const roleRedirects: Record<string, string> = {
+        cliente: "/tickets",
+        tecnico: "/agenda",
+        supervisor: "/dashboard",
+        administrador: "/dashboard",
+        area_administrativa: "/facturacion",
+      };
 
-  router.push(roleRedirects[me.role] ?? '/tickets')
-}
-    
-     catch (err: unknown) {
+      router.push(roleRedirects[me.role] ?? "/tickets");
+    } catch (err: unknown) {
       if (
-        typeof err === 'object' &&
+        typeof err === "object" &&
         err !== null &&
-        'response' in err &&
-        typeof (err as { response?: { status?: number } }).response?.status === 'number' &&
+        "response" in err &&
+        typeof (err as { response?: { status?: number } }).response?.status ===
+          "number" &&
         (err as { response: { status: number } }).response.status === 401
       ) {
-        setError('Usuario o contraseña incorrectos')
+        setError("Usuario o contraseña incorrectos");
       } else {
-        setError('Error al iniciar sesión. Intentá de nuevo.')
+        setError("Error al iniciar sesión. Intentá de nuevo.");
       }
     } finally {
-      setIsLoading(false)
+      setIsLoading(false);
     }
   }
 
@@ -86,19 +85,23 @@ export default function LoginPage() {
             />
           </div>
 
-          {error && (
-            <p className="text-red-500 text-sm text-center">{error}</p>
-          )}
+          {error && <p className="text-red-500 text-sm text-center">{error}</p>}
 
           <button
             type="submit"
             disabled={isLoading}
             className="bg-blue-600 text-white rounded-lg py-2 text-sm font-medium hover:bg-blue-700 disabled:opacity-50 transition-colors"
           >
-            {isLoading ? 'Ingresando...' : 'Iniciar sesión'}
+            {isLoading ? "Ingresando..." : "Iniciar sesión"}
           </button>
+          <p className="text-center text-sm text-gray-500">
+            ¿No tenés cuenta?{" "}
+            <a href="/register" className="text-blue-600 hover:underline">
+              Registrate
+            </a>
+          </p>
         </form>
       </div>
     </main>
-  )
+  );
 }
