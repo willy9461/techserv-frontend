@@ -2,8 +2,8 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { login } from '@/api/users'
 import useAuthStore from '@/store/authStore'
+import { login, getMe } from '@/api/users'
 
 export default function LoginPage() {
   const router = useRouter()
@@ -17,21 +17,23 @@ export default function LoginPage() {
     e.preventDefault()
     setError('')
     setIsLoading(true)
-
     try {
-      const { user: me, access_token } = await login(user, password)
-      setAuth(me, access_token)
+  const { access_token } = await login(user, password)
+  const me = await getMe(access_token)
+  setAuth(me, access_token)
 
-      const roleRedirects: Record<string, string> = {
-        cliente: '/tickets',
-        tecnico: '/agenda',
-        supervisor: '/dashboard',
-        administrador: '/dashboard',
-        area_administrativa: '/facturacion',
-      }
+  const roleRedirects: Record<string, string> = {
+    cliente: '/tickets',
+    tecnico: '/agenda',
+    supervisor: '/dashboard',
+    administrador: '/dashboard',
+    area_administrativa: '/facturacion',
+  }
 
-      router.push(roleRedirects[me.role] ?? '/tickets')
-    } catch (err: unknown) {
+  router.push(roleRedirects[me.role] ?? '/tickets')
+}
+    
+     catch (err: unknown) {
       if (
         typeof err === 'object' &&
         err !== null &&
