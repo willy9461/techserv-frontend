@@ -17,3 +17,20 @@ export async function getMe(token: string): Promise<User> {
   })
   return response.data
 }
+
+interface RegisterData {
+  email: string
+  password: string
+  full_name: string
+  role: string
+}
+
+interface RegisterResponse {
+  access_token: string
+  token_type: string
+}
+
+export async function register(data: RegisterData): Promise<RegisterResponse> {
+  const response = await axiosInstance.post<RegisterResponse>('/api/v1/auth/register', data)
+  return response.data
+}
