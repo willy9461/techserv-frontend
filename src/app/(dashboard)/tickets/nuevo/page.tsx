@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { TicketUrgencia, TipoEquipo, URGENCIA_LABELS, TIPO_EQUIPO_LABELS } from '@/types/ticket'
+import { createTicket } from '@/api/tickets'
 
 interface FormState {
   titulo: string
@@ -90,7 +91,7 @@ function Select<T extends string>({ value, onChange, options }: {
 }
 
 const URGENCIA_CONFIG: { value: TicketUrgencia; label: string; color: string; desc: string }[] = [
-  { value: 'baja',  label: 'Baja',  color: 'border-zinc-600 text-zinc-400',  desc: 'Sin impacto operativo inmediato' },
+  { value: 'baja',  label: 'Baja',  color: 'border-zinc-600 text-zinc-400',   desc: 'Sin impacto operativo inmediato' },
   { value: 'media', label: 'Media', color: 'border-amber-600 text-amber-400', desc: 'Afecta operación parcialmente' },
   { value: 'alta',  label: 'Alta',  color: 'border-red-600 text-red-400',     desc: 'Equipo fuera de servicio' },
 ]
@@ -125,6 +126,7 @@ export default function NuevoTicketPage() {
   const [form, setForm] = useState<FormState>(INITIAL)
   const [loading, setLoading] = useState(false)
   const [success, setSuccess] = useState(false)
+  const [error, setError] = useState<string | null>(null)
 
   const set = (key: keyof FormState) => (v: string) =>
     setForm((prev) => ({ ...prev, [key]: v }))
@@ -132,12 +134,27 @@ export default function NuevoTicketPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setLoading(true)
+    setError(null)
 
-    // TODO: POST /api/v1/tickets
-    await new Promise((r) => setTimeout(r, 1000))
-
-    setSuccess(true)
-    setTimeout(() => router.push('/tickets'), 1500)
+    try {
+      await createTicket({
+        titulo: form.titulo,
+        descripcion: form.descripcion,
+        urgencia: form.urgencia,
+        direccion: form.direccion,
+        equipo_nuevo: {
+          tipo: form.equipo_tipo,
+          marca: form.equipo_marca,
+          modelo: form.equipo_modelo,
+          nro_serie: form.equipo_nro_serie,
+        },
+      })
+      setSuccess(true)
+      setTimeout(() => router.push('/tickets'), 1500)
+    } catch {
+      setError('No se pudo crear el ticket. Intentá de nuevo.')
+      setLoading(false)
+    }
   }
 
   if (success) {
@@ -243,6 +260,11 @@ export default function NuevoTicketPage() {
             />
           </div>
         </div>
+
+        {/* Error */}
+        {error && (
+          <p className="text-sm text-red-400 text-center">{error}</p>
+        )}
 
         {/* Submit */}
         <div className="flex items-center justify-end gap-3 pb-4">
