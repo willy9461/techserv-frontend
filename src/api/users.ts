@@ -7,12 +7,12 @@ interface LoginResponse {
 }
 
 export async function login(email: string, password: string): Promise<LoginResponse> {
-  const response = await axiosInstance.post<LoginResponse>('/api/v1/auth/login', { email, password })
+  const response = await axiosInstance.post<LoginResponse>('/auth/login', { email, password })
   return response.data
 }
 
 export async function getMe(token: string): Promise<User> {
-  const response = await axiosInstance.get<User>('/api/v1/me', {
+  const response = await axiosInstance.get<User>('/me', {
     headers: { Authorization: `Bearer ${token}` }
   })
   return response.data
@@ -31,6 +31,6 @@ interface RegisterResponse {
 }
 
 export async function register(data: RegisterData): Promise<RegisterResponse> {
-  const response = await axiosInstance.post<RegisterResponse>('/api/v1/auth/register', data)
+  const response = await axiosInstance.post<RegisterResponse>('/auth/register', data)
   return response.data
 }
