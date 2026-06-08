@@ -1,4 +1,5 @@
 import { create } from 'zustand'
+import { persist } from 'zustand/middleware'
 import { User } from '@/types/user'
 
 interface AuthState {
@@ -10,13 +11,20 @@ interface AuthState {
   clearAuth: () => void
 }
 
-const useAuthStore = create<AuthState>((set) => ({
-  user: null,
-  token: null,
-  isLoading: false,
-  setAuth: (user, token) => set({ user, token }),
-  setIsLoading: (isLoading) => set({ isLoading }),
-  clearAuth: () => set({ user: null, token: null }),
-}))
+const useAuthStore = create<AuthState>()(
+  persist(
+    (set) => ({
+      user: null,
+      token: null,
+      isLoading: false,
+      setAuth: (user, token) => set({ user, token }),
+      setIsLoading: (isLoading) => set({ isLoading }),
+      clearAuth: () => set({ user: null, token: null }),
+    }),
+    {
+      name: 'techserv-auth',
+    }
+  )
+)
 
 export default useAuthStore
