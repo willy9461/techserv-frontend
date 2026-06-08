@@ -1,52 +1,13 @@
 'use client'
 
 import { useParams } from 'next/navigation'
+import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { EstadoBadge, UrgenciaBadge } from '@/components/shared/TicketCard'
 import { Ticket, ESTADO_ORDER, ESTADO_LABELS, TIPO_EQUIPO_LABELS } from '@/types/ticket'
+import { getTicketById } from '@/api/tickets'
 
-const MOCK_TICKET: Ticket = {
-  id: 'a1b2c3d4-0003',
-  titulo: 'PC no arranca',
-  descripcion:
-    'El equipo no enciende desde esta mañana. Cuando se pulsa el botón de encendido no hay respuesta, ni luces ni ventiladores. El UPS parece funcionar correctamente.',
-  estado: 'en_proceso',
-  urgencia: 'alta',
-  created_at: '2026-05-25T08:30:00Z',
-  direccion: 'Av. Corrientes 1234, CABA',
-  cliente: {
-    id: 'cli-001',
-    nombre: 'Estudio Jurídico Pérez',
-    email: 'admin@estudioperez.com',
-    telefono: '+54 11 4321-0000',
-    direccion: 'Av. Corrientes 1234, CABA',
-  },
-  tecnico: {
-    id: 'tec-003',
-    nombre: 'Martin Sciotti',
-    email: 'm.sciotti@federaldevelopment.com.ar',
-    especialidad: 'Informático',
-    zona: 'CABA Centro',
-    disponible: false,
-  },
-  equipo: {
-    id: 'eq-007',
-    tipo: 'informatico',
-    marca: 'Lenovo',
-    modelo: 'ThinkCentre M720',
-    nro_serie: 'TC-M720-2021-0042',
-  },
-}
-
-const MOCK_TIMELINE = [
-  { fecha: '2026-05-25T08:30:00Z', actor: 'Sistema',        accion: 'Ticket creado',                                        tipo: 'sistema' },
-  { fecha: '2026-05-25T09:05:00Z', actor: 'Guillermo G.',   accion: 'Ticket asignado a Martin Sciotti',                     tipo: 'asignacion' },
-  { fecha: '2026-05-25T10:30:00Z', actor: 'Martin Sciotti', accion: 'Diagnóstico iniciado. Sin señal en fuente de alimentación.', tipo: 'diagnostico' },
-  { fecha: '2026-05-26T09:00:00Z', actor: 'Martin Sciotti', accion: 'Visita presencial agendada para el 26/05',              tipo: 'agenda' },
-  { fecha: '2026-05-26T11:15:00Z', actor: 'Martin Sciotti', accion: 'Intervención en curso. Se reemplaza fuente de poder.',  tipo: 'intervencion' },
-]
-
-function TimelineItem({ item, last }: { item: typeof MOCK_TIMELINE[0]; last: boolean }) {
+function TimelineItem({ item, last }: { item: { fecha: string; actor: string; accion: string; tipo: string }; last: boolean }) {
   const dotColor =
     item.tipo === 'sistema'      ? 'bg-zinc-600' :
     item.tipo === 'asignacion'   ? 'bg-blue-500' :
@@ -110,7 +71,37 @@ function Section({ title, children }: { title: string; children: React.ReactNode
 
 export default function TicketDetailPage() {
   const params = useParams()
-  const ticket = MOCK_TICKET // TODO: fetch por params.id
+  const id = params.id as string
+
+  const [ticket, setTicket] = useState<Ticket | null>(null)
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
+
+  useEffect(() => {
+    getTicketById(id)
+      .then(setTicket)
+      .catch(() => setError('No se pudo cargar el ticket.'))
+      .finally(() => setLoading(false))
+  }, [id])
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center py-24">
+        <div className="w-6 h-6 border-2 border-zinc-600 border-t-blue-500 rounded-full animate-spin" />
+      </div>
+    )
+  }
+
+  if (error || !ticket) {
+    return (
+      <div className="flex flex-col items-center justify-center py-24 gap-3">
+        <p className="text-sm text-zinc-400">{error ?? 'Ticket no encontrado.'}</p>
+        <Link href="/tickets" className="text-xs text-blue-400 hover:text-blue-300 underline">
+          Volver a tickets
+        </Link>
+      </div>
+    )
+  }
 
   return (
     <div className="space-y-6 max-w-5xl">
@@ -157,12 +148,9 @@ export default function TicketDetailPage() {
             <p className="text-sm text-zinc-300 leading-relaxed">{ticket.descripcion}</p>
           </Section>
 
+          {/* Timeline: se conecta cuando backend exponga el historial de acciones */}
           <Section title="Historial">
-            <div className="mt-1">
-              {MOCK_TIMELINE.map((item, i) => (
-                <TimelineItem key={i} item={item} last={i === MOCK_TIMELINE.length - 1} />
-              ))}
-            </div>
+            <p className="text-sm text-zinc-500 italic">Historial disponible próximamente.</p>
           </Section>
         </div>
 
