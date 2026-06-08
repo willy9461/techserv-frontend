@@ -4,8 +4,132 @@ import { useParams } from 'next/navigation'
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { EstadoBadge, UrgenciaBadge } from '@/components/shared/TicketCard'
-import { Ticket, ESTADO_ORDER, ESTADO_LABELS, TIPO_EQUIPO_LABELS } from '@/types/ticket'
-import { getTicketById } from '@/api/tickets'
+import { Ticket, ESTADO_ORDER, ESTADO_LABELS, TIPO_EQUIPO_LABELS, TicketEstado } from '@/types/ticket'
+import { getTicketById, updateTicketStatus } from '@/api/tickets'
+
+// ─── Modal Cambiar Estado ─────────────────────────────────────────────────────
+
+const TRANSICIONES: Record<TicketEstado, TicketEstado[]> = {
+  abierto:        ['en_diagnostico', 'cancelado'],
+  en_diagnostico: ['en_proceso', 'cancelado'],
+  en_proceso:     ['resuelto', 'cancelado'],
+  resuelto:       ['cerrado'],
+  cerrado:        [],
+  cancelado:      [],
+}
+
+function CambiarEstadoModal({ ticket, onClose, onSuccess }: {
+  ticket: Ticket
+  onClose: () => void
+  onSuccess: (nuevoEstado: TicketEstado) => void
+}) {
+  const [estadoSeleccionado, setEstadoSeleccionado] = useState<TicketEstado | null>(null)
+  const [nota, setNota] = useState('')
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+
+  const opciones = TRANSICIONES[ticket.estado] ?? []
+
+  const handleConfirmar = async () => {
+    if (!estadoSeleccionado) return
+    setLoading(true)
+    setError(null)
+    try {
+      await updateTicketStatus(ticket.id, { estado: estadoSeleccionado, nota })
+      onSuccess(estadoSeleccionado)
+    } catch {
+      setError('No se pudo actualizar el estado. Intentá de nuevo.')
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  return (
+    <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50">
+      <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-6 w-full max-w-sm space-y-4">
+        <h2 className="text-sm font-semibold text-white">Cambiar estado</h2>
+
+        {opciones.length === 0 ? (
+          <p className="text-sm text-zinc-500">Este ticket no puede cambiar de estado.</p>
+        ) : (
+          <>
+            <div className="space-y-2">
+              {opciones.map((e) => (
+                <button
+                  key={e}
+                  onClick={() => setEstadoSeleccionado(e)}
+                  className={`w-full text-left px-3 py-2.5 rounded-lg border text-sm transition-colors ${
+                    estadoSeleccionado === e
+                      ? 'border-blue-500 bg-blue-500/10 text-blue-300'
+                      : 'border-zinc-800 text-zinc-400 hover:border-zinc-700 hover:bg-zinc-800'
+                  }`}
+                >
+                  {ESTADO_LABELS[e]}
+                </button>
+              ))}
+            </div>
+
+            <div>
+              <label className="block text-xs text-zinc-500 mb-1.5">Nota (opcional)</label>
+              <textarea
+                value={nota}
+                onChange={(e) => setNota(e.target.value)}
+                rows={2}
+                placeholder="Agregá una nota sobre el cambio..."
+                className="w-full bg-zinc-800 border border-zinc-700 rounded-lg px-3 py-2 text-sm text-zinc-200 placeholder-zinc-600 focus:outline-none focus:border-zinc-600 resize-none"
+              />
+            </div>
+
+            {error && <p className="text-xs text-red-400">{error}</p>}
+          </>
+        )}
+
+        <div className="flex justify-end gap-2 pt-1">
+          <button
+            onClick={onClose}
+            className="px-3 py-2 text-sm text-zinc-400 hover:text-zinc-200 transition-colors"
+          >
+            Cancelar
+          </button>
+          {opciones.length > 0 && (
+            <button
+              onClick={handleConfirmar}
+              disabled={!estadoSeleccionado || loading}
+              className="px-4 py-2 bg-blue-500 hover:bg-blue-400 disabled:bg-zinc-700 disabled:text-zinc-500 text-white text-sm font-medium rounded-lg transition-colors"
+            >
+              {loading ? 'Guardando...' : 'Confirmar'}
+            </button>
+          )}
+        </div>
+      </div>
+    </div>
+  )
+}
+
+// ─── Modal Asignar Técnico ────────────────────────────────────────────────────
+
+function AsignarTecnicoModal({ onClose }: { onClose: () => void }) {
+  return (
+    <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50">
+      <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-6 w-full max-w-sm space-y-4">
+        <h2 className="text-sm font-semibold text-white">Asignar técnico</h2>
+        <p className="text-sm text-zinc-500">
+          Disponible cuando el backend exponga el endpoint de técnicos.
+        </p>
+        <div className="flex justify-end">
+          <button
+            onClick={onClose}
+            className="px-3 py-2 text-sm text-zinc-400 hover:text-zinc-200 transition-colors"
+          >
+            Cerrar
+          </button>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+// ─── Componentes auxiliares ───────────────────────────────────────────────────
 
 function TimelineItem({ item, last }: { item: { fecha: string; actor: string; accion: string; tipo: string }; last: boolean }) {
   const dotColor =
@@ -69,6 +193,8 @@ function Section({ title, children }: { title: string; children: React.ReactNode
   )
 }
 
+// ─── Página principal ─────────────────────────────────────────────────────────
+
 export default function TicketDetailPage() {
   const params = useParams()
   const id = params.id as string
@@ -76,6 +202,8 @@ export default function TicketDetailPage() {
   const [ticket, setTicket] = useState<Ticket | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const [modalEstado, setModalEstado] = useState(false)
+  const [modalTecnico, setModalTecnico] = useState(false)
 
   useEffect(() => {
     getTicketById(id)
@@ -105,6 +233,21 @@ export default function TicketDetailPage() {
 
   return (
     <div className="space-y-6 max-w-5xl">
+      {/* Modales */}
+      {modalEstado && (
+        <CambiarEstadoModal
+          ticket={ticket}
+          onClose={() => setModalEstado(false)}
+          onSuccess={(nuevoEstado) => {
+            setTicket((prev) => prev ? { ...prev, estado: nuevoEstado } : prev)
+            setModalEstado(false)
+          }}
+        />
+      )}
+      {modalTecnico && (
+        <AsignarTecnicoModal onClose={() => setModalTecnico(false)} />
+      )}
+
       {/* Breadcrumb */}
       <div className="flex items-center gap-2 text-sm text-zinc-500">
         <Link href="/tickets" className="hover:text-zinc-300 transition-colors">Tickets</Link>
@@ -127,10 +270,16 @@ export default function TicketDetailPage() {
           </div>
         </div>
         <div className="flex gap-2 shrink-0">
-          <button className="px-3 py-2 bg-zinc-800 hover:bg-zinc-700 border border-zinc-700 text-zinc-300 text-sm rounded-lg transition-colors">
+          <button
+            onClick={() => setModalTecnico(true)}
+            className="px-3 py-2 bg-zinc-800 hover:bg-zinc-700 border border-zinc-700 text-zinc-300 text-sm rounded-lg transition-colors"
+          >
             Asignar técnico
           </button>
-          <button className="px-3 py-2 bg-blue-500 hover:bg-blue-400 text-white text-sm font-medium rounded-lg transition-colors">
+          <button
+            onClick={() => setModalEstado(true)}
+            className="px-3 py-2 bg-blue-500 hover:bg-blue-400 text-white text-sm font-medium rounded-lg transition-colors"
+          >
             Cambiar estado
           </button>
         </div>
@@ -142,19 +291,15 @@ export default function TicketDetailPage() {
       </Section>
 
       <div className="grid grid-cols-3 gap-4">
-        {/* Columna izquierda */}
         <div className="col-span-2 space-y-4">
           <Section title="Descripción">
             <p className="text-sm text-zinc-300 leading-relaxed">{ticket.descripcion}</p>
           </Section>
-
-          {/* Timeline: se conecta cuando backend exponga el historial de acciones */}
           <Section title="Historial">
             <p className="text-sm text-zinc-500 italic">Historial disponible próximamente.</p>
           </Section>
         </div>
 
-        {/* Columna derecha */}
         <div className="space-y-4">
           <Section title="Cliente">
             <div className="space-y-2 text-sm">
