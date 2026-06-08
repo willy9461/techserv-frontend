@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useEffect } from 'react'
 import Link from 'next/link'
 import { TicketCard, TicketRow } from '@/components/shared/TicketCard'
 import {
@@ -10,80 +10,30 @@ import {
   ESTADO_LABELS,
   URGENCIA_LABELS,
 } from '@/types/ticket'
-
-const MOCK_TICKETS: TicketListItem[] = [
-  {
-    id: 'a1b2c3d4-0001',
-    titulo: 'Aire acondicionado no enfría',
-    estado: 'abierto',
-    urgencia: 'alta',
-    created_at: '2026-05-27T09:15:00Z',
-    cliente_nombre: 'Lucía Fernández',
-    equipo_tipo: 'hvac',
-  },
-  {
-    id: 'a1b2c3d4-0002',
-    titulo: 'Lavadora no centrifuga',
-    estado: 'en_diagnostico',
-    urgencia: 'media',
-    created_at: '2026-05-26T14:00:00Z',
-    cliente_nombre: 'Carlos Méndez',
-    tecnico_nombre: 'M. Jurado',
-    equipo_tipo: 'electrodomestico',
-  },
-  {
-    id: 'a1b2c3d4-0003',
-    titulo: 'PC no arranca',
-    estado: 'en_proceso',
-    urgencia: 'alta',
-    created_at: '2026-05-25T08:30:00Z',
-    cliente_nombre: 'Estudio Jurídico Pérez',
-    tecnico_nombre: 'M. Sciotti',
-    equipo_tipo: 'informatico',
-  },
-  {
-    id: 'a1b2c3d4-0004',
-    titulo: 'Mantenimiento preventivo compresor',
-    estado: 'resuelto',
-    urgencia: 'baja',
-    created_at: '2026-05-24T11:00:00Z',
-    cliente_nombre: 'Frigorífico del Sur',
-    tecnico_nombre: 'G. Galarraga',
-    equipo_tipo: 'industrial',
-  },
-  {
-    id: 'a1b2c3d4-0005',
-    titulo: 'Heladera no congela',
-    estado: 'abierto',
-    urgencia: 'media',
-    created_at: '2026-05-29T07:45:00Z',
-    cliente_nombre: 'Roberto Sosa',
-    equipo_tipo: 'electrodomestico',
-  },
-  {
-    id: 'a1b2c3d4-0006',
-    titulo: 'Red empresarial caída',
-    estado: 'en_proceso',
-    urgencia: 'alta',
-    created_at: '2026-05-29T10:00:00Z',
-    cliente_nombre: 'Empresa Textil Norteña',
-    tecnico_nombre: 'A. Volponi',
-    equipo_tipo: 'informatico',
-  },
-]
+import { getTickets } from '@/api/tickets'
 
 const ESTADOS: TicketEstado[] = ['abierto', 'en_diagnostico', 'en_proceso', 'resuelto', 'cerrado', 'cancelado']
 const URGENCIAS: TicketUrgencia[] = ['alta', 'media', 'baja']
 type ViewMode = 'cards' | 'table'
 
 export default function TicketsPage() {
+  const [tickets, setTickets] = useState<TicketListItem[]>([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
   const [search, setSearch] = useState('')
   const [estadoFiltro, setEstadoFiltro] = useState<TicketEstado | 'todos'>('todos')
   const [urgenciaFiltro, setUrgenciaFiltro] = useState<TicketUrgencia | 'todos'>('todos')
   const [viewMode, setViewMode] = useState<ViewMode>('cards')
 
+  useEffect(() => {
+    getTickets()
+      .then(setTickets)
+      .catch(() => setError('No se pudieron cargar los tickets.'))
+      .finally(() => setLoading(false))
+  }, [])
+
   const filtered = useMemo(() => {
-    return MOCK_TICKETS.filter((t) => {
+    return tickets.filter((t) => {
       const matchSearch =
         search === '' ||
         t.titulo.toLowerCase().includes(search.toLowerCase()) ||
@@ -93,15 +43,37 @@ export default function TicketsPage() {
       const matchUrgencia = urgenciaFiltro === 'todos' || t.urgencia === urgenciaFiltro
       return matchSearch && matchEstado && matchUrgencia
     })
-  }, [search, estadoFiltro, urgenciaFiltro])
+  }, [tickets, search, estadoFiltro, urgenciaFiltro])
 
   const countByEstado = useMemo(() => {
     const counts: Partial<Record<TicketEstado, number>> = {}
-    MOCK_TICKETS.forEach((t) => {
+    tickets.forEach((t) => {
       counts[t.estado] = (counts[t.estado] ?? 0) + 1
     })
     return counts
-  }, [])
+  }, [tickets])
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center py-24">
+        <div className="w-6 h-6 border-2 border-zinc-600 border-t-blue-500 rounded-full animate-spin" />
+      </div>
+    )
+  }
+
+  if (error) {
+    return (
+      <div className="flex flex-col items-center justify-center py-24 gap-3">
+        <p className="text-sm text-zinc-400">{error}</p>
+        <button
+          onClick={() => { setError(null); setLoading(true); getTickets().then(setTickets).catch(() => setError('No se pudieron cargar los tickets.')).finally(() => setLoading(false)) }}
+          className="text-xs text-blue-400 hover:text-blue-300 underline"
+        >
+          Reintentar
+        </button>
+      </div>
+    )
+  }
 
   return (
     <div className="space-y-6">
@@ -133,7 +105,7 @@ export default function TicketsPage() {
               : 'bg-zinc-900 text-zinc-400 hover:bg-zinc-800 border border-zinc-800'
           }`}
         >
-          Todos · {MOCK_TICKETS.length}
+          Todos · {tickets.length}
         </button>
         {ESTADOS.map((e) => {
           const count = countByEstado[e] ?? 0
