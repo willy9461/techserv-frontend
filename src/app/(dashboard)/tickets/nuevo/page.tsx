@@ -14,7 +14,10 @@ interface FormState {
   equipo_marca: string
   equipo_modelo: string
   equipo_nro_serie: string
-  direccion: string
+  dir_calle: string
+  dir_altura: string
+  dir_piso_depto: string
+  dir_localidad: string
 }
 
 const INITIAL: FormState = {
@@ -25,7 +28,19 @@ const INITIAL: FormState = {
   equipo_marca: '',
   equipo_modelo: '',
   equipo_nro_serie: '',
-  direccion: '',
+  dir_calle: '',
+  dir_altura: '',
+  dir_piso_depto: '',
+  dir_localidad: '',
+}
+
+function buildDireccion(form: FormState): string {
+  const parts = [
+    `${form.dir_calle} ${form.dir_altura}`.trim(),
+    form.dir_piso_depto || null,
+    form.dir_localidad,
+  ].filter(Boolean)
+  return parts.join(', ')
 }
 
 function Label({ children, required }: { children: React.ReactNode; required?: boolean }) {
@@ -131,6 +146,9 @@ export default function NuevoTicketPage() {
   const set = (key: keyof FormState) => (v: string) =>
     setForm((prev) => ({ ...prev, [key]: v }))
 
+  const direccionCompleta = buildDireccion(form)
+  const formValido = form.titulo && form.dir_calle && form.dir_altura && form.dir_localidad
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setLoading(true)
@@ -141,7 +159,7 @@ export default function NuevoTicketPage() {
         titulo: form.titulo,
         descripcion: form.descripcion,
         urgencia: form.urgencia,
-        direccion: form.direccion,
+        direccion: direccionCompleta,
         equipo_nuevo: {
           tipo: form.equipo_tipo,
           marca: form.equipo_marca,
@@ -250,15 +268,31 @@ export default function NuevoTicketPage() {
         {/* Dirección */}
         <div className="bg-zinc-900 border border-zinc-800 rounded-lg p-5 space-y-4">
           <h2 className="text-xs font-medium text-zinc-500 uppercase tracking-wider">Dirección de intervención</h2>
-          <div>
-            <Label required>Dirección</Label>
-            <Input
-              value={form.direccion}
-              onChange={set('direccion')}
-              placeholder="Ej: Av. Corrientes 1234, CABA"
-              required
-            />
+          <div className="grid grid-cols-3 gap-4">
+            <div className="col-span-2">
+              <Label required>Calle</Label>
+              <Input value={form.dir_calle} onChange={set('dir_calle')} placeholder="Ej: Av. Corrientes" required />
+            </div>
+            <div>
+              <Label required>Altura</Label>
+              <Input value={form.dir_altura} onChange={set('dir_altura')} placeholder="Ej: 1234" required />
+            </div>
           </div>
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <Label>Piso / Depto</Label>
+              <Input value={form.dir_piso_depto} onChange={set('dir_piso_depto')} placeholder="Ej: 3B" />
+            </div>
+            <div>
+              <Label required>Localidad</Label>
+              <Input value={form.dir_localidad} onChange={set('dir_localidad')} placeholder="Ej: CABA" required />
+            </div>
+          </div>
+          {direccionCompleta && (
+            <p className="text-xs text-zinc-500">
+              Vista previa: <span className="text-zinc-300">{direccionCompleta}</span>
+            </p>
+          )}
         </div>
 
         {/* Error */}
@@ -275,7 +309,7 @@ export default function NuevoTicketPage() {
           </Link>
           <button
             type="submit"
-            disabled={loading || !form.titulo || !form.direccion}
+            disabled={loading || !formValido}
             className="px-5 py-2.5 bg-blue-500 hover:bg-blue-400 disabled:bg-zinc-700 disabled:text-zinc-500 disabled:cursor-not-allowed text-white text-sm font-medium rounded-lg transition-colors flex items-center gap-2"
           >
             {loading ? (
