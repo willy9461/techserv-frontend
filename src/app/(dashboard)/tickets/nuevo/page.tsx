@@ -3,8 +3,9 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
-import { TicketUrgencia, TipoEquipo, URGENCIA_LABELS, TIPO_EQUIPO_LABELS } from '@/types/ticket'
+import { TicketUrgencia, TipoEquipo, TIPO_EQUIPO_LABELS } from '@/types/ticket'
 import { createTicket } from '@/api/tickets'
+import { createEquipo } from '@/api/equipos'
 
 interface FormState {
   titulo: string
@@ -155,18 +156,23 @@ export default function NuevoTicketPage() {
     setError(null)
 
     try {
+      // Paso 1: crear el equipo
+      const equipo = await createEquipo({
+        tipo: form.equipo_tipo,
+        marca: form.equipo_marca,
+        modelo: form.equipo_modelo,
+        numero_serie: form.equipo_nro_serie,
+      })
+
+      // Paso 2: crear el ticket con el equipo_id
       await createTicket({
         titulo: form.titulo,
         descripcion: form.descripcion,
         urgencia: form.urgencia,
         direccion: direccionCompleta,
-        equipo_nuevo: {
-          tipo: form.equipo_tipo,
-          marca: form.equipo_marca,
-          modelo: form.equipo_modelo,
-          nro_serie: form.equipo_nro_serie,
-        },
+        equipo_id: equipo.id,
       })
+
       setSuccess(true)
       setTimeout(() => router.push('/tickets'), 1500)
     } catch {

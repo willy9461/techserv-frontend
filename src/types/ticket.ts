@@ -70,13 +70,7 @@ export interface CreateTicketPayload {
   titulo: string
   descripcion: string
   urgencia: TicketUrgencia
-  equipo_id?: string
-  equipo_nuevo?: {
-    tipo: TipoEquipo
-    marca: string
-    modelo: string
-    nro_serie: string
-  }
+  equipo_id: string
   direccion: string
 }
 
