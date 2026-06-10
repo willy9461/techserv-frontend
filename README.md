@@ -7,7 +7,7 @@ Aplicación web responsive para la gestión de servicios técnicos. Construida c
 - **Framework**: Next.js (App Router)
 - **Lenguaje**: TypeScript
 - **Estilos**: Tailwind CSS
-- **Auth**: Supabase Auth
+-- **Auth**: JWT via cookies (AuthX)
 - **HTTP Client**: Axios
 - **Estado global**: Zustand
 - **Formularios**: React Hook Form + Zod
