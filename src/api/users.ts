@@ -34,3 +34,30 @@ export async function register(data: RegisterData): Promise<RegisterResponse> {
   const response = await axiosInstance.post<RegisterResponse>('/auth/register', data)
   return response.data
 }
+
+export interface TecnicoAPI {
+  id: string
+  nombre: string
+  email: string
+  especialidad: string
+  zona: string
+  disponible: boolean
+}
+
+export interface ClienteAPI {
+  id: string
+  nombre: string
+  email: string
+  telefono?: string
+  direccion?: string
+}
+
+export async function getTecnicos(): Promise<TecnicoAPI[]> {
+  const { data } = await axiosInstance.get<TecnicoAPI[]>('/users/tecnicos')
+  return data
+}
+
+export async function getClientes(): Promise<ClienteAPI[]> {
+  const { data } = await axiosInstance.get<ClienteAPI[]>('/users/clientes')
+  return data
+}
