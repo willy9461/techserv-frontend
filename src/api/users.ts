@@ -12,7 +12,7 @@ export async function login(email: string, password: string): Promise<LoginRespo
 }
 
 export async function getMe(token: string): Promise<User> {
-  const response = await axiosInstance.get<User>('/me', {
+  const response = await axiosInstance.get<User>('/users/me', {
     headers: { Authorization: `Bearer ${token}` }
   })
   return response.data
