@@ -47,11 +47,12 @@ export interface Ticket {
   descripcion: string
   estado: TicketEstado
   urgencia: TicketUrgencia
-  created_at: string
+  created_at?: string
+  fecha_creacion?: string
   closed_at?: string
-  cliente: Cliente
+  cliente?: Cliente
   tecnico?: Tecnico
-  equipo: Equipo
+  equipo?: Equipo
   direccion: string
 }
 
