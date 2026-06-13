@@ -4,7 +4,7 @@ import { useParams } from 'next/navigation'
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { EstadoBadge, UrgenciaBadge } from '@/components/shared/TicketCard'
-import { Ticket, ESTADO_ORDER, ESTADO_LABELS, TIPO_EQUIPO_LABELS, TicketEstado } from '@/types/ticket'
+import { Ticket, ESTADO_ORDER, ESTADO_LABELS, TicketEstado } from '@/types/ticket'
 import { getTicketById, updateTicketStatus } from '@/api/tickets'
 
 // ─── Modal Cambiar Estado ─────────────────────────────────────────────────────
@@ -263,7 +263,8 @@ export default function TicketDetailPage() {
             <EstadoBadge estado={ticket.estado} />
             <UrgenciaBadge urgencia={ticket.urgencia} />
             <span className="text-xs text-zinc-500">
-{new Date(ticket.fecha_creacion ?? ticket.created_at ?? '').toLocaleDateString('es-AR', {                day: '2-digit', month: 'long', year: 'numeric',
+              {new Date(ticket.fecha_creacion ?? ticket.created_at ?? '').toLocaleDateString('es-AR', {
+                day: '2-digit', month: 'long', year: 'numeric',
               })}
             </span>
           </div>
@@ -303,10 +304,10 @@ export default function TicketDetailPage() {
           <Section title="Cliente">
             {ticket.cliente ? (
               <div className="space-y-2 text-sm">
-                <p className="font-medium text-zinc-200">{ticket.cliente.nombre}</p>
+                <p className="font-medium text-zinc-200">{ticket.cliente.full_name}</p>
                 <p className="text-zinc-500">{ticket.cliente.email}</p>
-                {ticket.cliente.telefono && <p className="text-zinc-500">{ticket.cliente.telefono}</p>}
-                <p className="text-zinc-500">{ticket.cliente.direccion}</p>
+                {ticket.cliente.phone && <p className="text-zinc-500">{ticket.cliente.phone}</p>}
+                {ticket.cliente.direccion && <p className="text-zinc-500">{ticket.cliente.direccion}</p>}
               </div>
             ) : (
               <p className="text-sm text-zinc-500 italic">Sin información del cliente.</p>
@@ -318,14 +319,14 @@ export default function TicketDetailPage() {
               <div className="space-y-2 text-sm">
                 <div className="flex items-center gap-2">
                   <div className="w-8 h-8 rounded-full bg-violet-500/20 flex items-center justify-center text-xs font-medium text-violet-300">
-                    {ticket.tecnico.nombre.split(' ').map(n => n[0]).join('').slice(0, 2)}
+                    {ticket.tecnico.full_name.split(' ').map((n: string) => n[0]).join('').slice(0, 2)}
                   </div>
                   <div>
-                    <p className="font-medium text-zinc-200">{ticket.tecnico.nombre}</p>
-                    <p className="text-zinc-500">{ticket.tecnico.especialidad}</p>
+                    <p className="font-medium text-zinc-200">{ticket.tecnico.full_name}</p>
+                    {ticket.tecnico.especialidad && <p className="text-zinc-500">{ticket.tecnico.especialidad}</p>}
                   </div>
                 </div>
-                <p className="text-zinc-500">Zona: {ticket.tecnico.zona}</p>
+                {ticket.tecnico.zona && <p className="text-zinc-500">Zona: {ticket.tecnico.zona}</p>}
               </div>
             ) : (
               <p className="text-sm text-zinc-500 italic">Sin técnico asignado</p>
@@ -336,8 +337,8 @@ export default function TicketDetailPage() {
             {ticket.equipo ? (
               <div className="space-y-1.5 text-sm">
                 <p className="font-medium text-zinc-200">{ticket.equipo.marca} {ticket.equipo.modelo}</p>
-                <p className="text-zinc-500">{TIPO_EQUIPO_LABELS[ticket.equipo.tipo]}</p>
-                <p className="font-mono text-xs text-zinc-600">{ticket.equipo.nro_serie}</p>
+                <p className="text-zinc-500">{ticket.equipo.tipo}</p>
+                <p className="font-mono text-xs text-zinc-600">{ticket.equipo.numero_serie}</p>
               </div>
             ) : (
               <p className="text-sm text-zinc-500 italic">Sin información del equipo.</p>

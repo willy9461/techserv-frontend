@@ -15,30 +15,30 @@ export type TipoEquipo =
   | 'informatico'
   | 'otro'
 
-export interface Tecnico {
-  id: string
-  nombre: string
-  email: string
-  especialidad: string
-  zona: string
-  disponible: boolean
-  avatarUrl?: string
-}
-
 export interface Cliente {
   id: string
-  nombre: string
+  full_name: string
   email: string
-  telefono?: string
-  direccion: string
+  phone?: string
+  direccion?: string
+}
+
+export interface Tecnico {
+  id: string
+  full_name: string
+  email?: string
+  especialidad?: string
+  zona?: string
+  disponible?: boolean
+  avatarUrl?: string
 }
 
 export interface Equipo {
   id: string
-  tipo: TipoEquipo
+  tipo: string
   marca: string
   modelo: string
-  nro_serie: string
+  numero_serie: string
 }
 
 export interface Ticket {
