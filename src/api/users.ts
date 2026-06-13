@@ -37,18 +37,18 @@ export async function register(data: RegisterData): Promise<RegisterResponse> {
 
 export interface TecnicoAPI {
   id: string
-  nombre: string
+  full_name: string
   email: string
-  especialidad: string
-  zona: string
-  disponible: boolean
+  phone?: string
+  role?: string
+  is_active?: boolean
 }
 
 export interface ClienteAPI {
   id: string
-  nombre: string
+  full_name: string
   email: string
-  telefono?: string
+  phone?: string
   direccion?: string
 }
 

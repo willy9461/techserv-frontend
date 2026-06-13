@@ -6,6 +6,7 @@ import Link from 'next/link'
 import { EstadoBadge, UrgenciaBadge } from '@/components/shared/TicketCard'
 import { Ticket, ESTADO_ORDER, ESTADO_LABELS, TicketEstado } from '@/types/ticket'
 import { getTicketById, updateTicketStatus } from '@/api/tickets'
+import { getTecnicos } from '@/api/users'
 
 // ─── Modal Cambiar Estado ─────────────────────────────────────────────────────
 
@@ -108,54 +109,93 @@ function CambiarEstadoModal({ ticket, onClose, onSuccess }: {
 
 // ─── Modal Asignar Técnico ────────────────────────────────────────────────────
 
-function AsignarTecnicoModal({ onClose }: { onClose: () => void }) {
+interface TecnicoListItem {
+  id: string
+  full_name: string
+  email: string
+  phone?: string
+}
+
+function AsignarTecnicoModal({ onClose, onSuccess }: {
+  onClose: () => void
+  onSuccess: (tecnico: TecnicoListItem) => void
+}) {
+  const [tecnicos, setTecnicos] = useState<TecnicoListItem[]>([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
+  const [seleccionado, setSeleccionado] = useState<string | null>(null)
+  const [guardando, setGuardando] = useState(false)
+
+  useEffect(() => {
+    getTecnicos()
+      .then(setTecnicos)
+      .catch(() => setError('No se pudieron cargar los técnicos.'))
+      .finally(() => setLoading(false))
+  }, [])
+
+  const handleConfirmar = async () => {
+    if (!seleccionado) return
+    setGuardando(true)
+    const tecnico = tecnicos.find(t => t.id === seleccionado)
+    if (tecnico) onSuccess(tecnico)
+    setGuardando(false)
+  }
+
   return (
     <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50">
       <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-6 w-full max-w-sm space-y-4">
         <h2 className="text-sm font-semibold text-white">Asignar técnico</h2>
-        <p className="text-sm text-zinc-500">
-          Disponible cuando el backend exponga el endpoint de técnicos.
-        </p>
-        <div className="flex justify-end">
+
+        {loading ? (
+          <div className="flex justify-center py-4">
+            <div className="w-5 h-5 border-2 border-zinc-600 border-t-blue-500 rounded-full animate-spin" />
+          </div>
+        ) : error ? (
+          <p className="text-sm text-red-400">{error}</p>
+        ) : tecnicos.length === 0 ? (
+          <p className="text-sm text-zinc-500">No hay técnicos disponibles.</p>
+        ) : (
+          <div className="space-y-2 max-h-60 overflow-y-auto">
+            {tecnicos.map((t) => (
+              <button
+                key={t.id}
+                onClick={() => setSeleccionado(t.id)}
+                className={`w-full text-left px-3 py-2.5 rounded-lg border text-sm transition-colors ${
+                  seleccionado === t.id
+                    ? 'border-blue-500 bg-blue-500/10 text-blue-300'
+                    : 'border-zinc-800 text-zinc-400 hover:border-zinc-700 hover:bg-zinc-800'
+                }`}
+              >
+                <p className="font-medium">{t.full_name}</p>
+                <p className="text-xs opacity-70 mt-0.5">{t.email}</p>
+              </button>
+            ))}
+          </div>
+        )}
+
+        <div className="flex justify-end gap-2 pt-1">
           <button
             onClick={onClose}
             className="px-3 py-2 text-sm text-zinc-400 hover:text-zinc-200 transition-colors"
           >
-            Cerrar
+            Cancelar
           </button>
+          {!loading && !error && tecnicos.length > 0 && (
+            <button
+              onClick={handleConfirmar}
+              disabled={!seleccionado || guardando}
+              className="px-4 py-2 bg-blue-500 hover:bg-blue-400 disabled:bg-zinc-700 disabled:text-zinc-500 text-white text-sm font-medium rounded-lg transition-colors"
+            >
+              {guardando ? 'Guardando...' : 'Confirmar'}
+            </button>
+          )}
         </div>
       </div>
     </div>
   )
 }
 
-// ─── Componentes auxiliares ───────────────────────────────────────────────────
 
-function TimelineItem({ item, last }: { item: { fecha: string; actor: string; accion: string; tipo: string }; last: boolean }) {
-  const dotColor =
-    item.tipo === 'sistema'      ? 'bg-zinc-600' :
-    item.tipo === 'asignacion'   ? 'bg-blue-500' :
-    item.tipo === 'diagnostico'  ? 'bg-amber-500' :
-    item.tipo === 'intervencion' ? 'bg-violet-500' :
-                                   'bg-emerald-500'
-
-  const fecha = new Date(item.fecha).toLocaleString('es-AR', {
-    day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit',
-  })
-
-  return (
-    <div className="flex gap-4">
-      <div className="flex flex-col items-center">
-        <div className={`w-2.5 h-2.5 rounded-full mt-1 shrink-0 ${dotColor}`} />
-        {!last && <div className="w-px flex-1 bg-zinc-800 mt-1" />}
-      </div>
-      <div className="pb-5">
-        <p className="text-sm text-zinc-200">{item.accion}</p>
-        <p className="text-xs text-zinc-500 mt-0.5">{item.actor} · {fecha}</p>
-      </div>
-    </div>
-  )
-}
 
 function TicketProgress({ estado }: { estado: string }) {
   const currentIdx = ESTADO_ORDER.indexOf(estado as never)
@@ -245,7 +285,16 @@ export default function TicketDetailPage() {
         />
       )}
       {modalTecnico && (
-        <AsignarTecnicoModal onClose={() => setModalTecnico(false)} />
+        <AsignarTecnicoModal
+          onClose={() => setModalTecnico(false)}
+          onSuccess={(tecnico) => {
+            setTicket((prev) => prev ? {
+              ...prev,
+              tecnico: { id: tecnico.id, full_name: tecnico.full_name }
+            } : prev)
+            setModalTecnico(false)
+          }}
+        />
       )}
 
       {/* Breadcrumb */}
