@@ -7,6 +7,7 @@ import { EstadoBadge, UrgenciaBadge } from '@/components/shared/TicketCard'
 import { Ticket, ESTADO_ORDER, ESTADO_LABELS, TicketEstado } from '@/types/ticket'
 import { getTicketById, updateTicketStatus } from '@/api/tickets'
 import { getTecnicos } from '@/api/users'
+import axiosInstance from '@/lib/axios'
 
 // ─── Modal Cambiar Estado ─────────────────────────────────────────────────────
 
@@ -116,7 +117,8 @@ interface TecnicoListItem {
   phone?: string
 }
 
-function AsignarTecnicoModal({ onClose, onSuccess }: {
+function AsignarTecnicoModal({ ticketId, onClose, onSuccess }: {
+  ticketId: string
   onClose: () => void
   onSuccess: (tecnico: TecnicoListItem) => void
 }) {
@@ -136,9 +138,15 @@ function AsignarTecnicoModal({ onClose, onSuccess }: {
   const handleConfirmar = async () => {
     if (!seleccionado) return
     setGuardando(true)
-    const tecnico = tecnicos.find(t => t.id === seleccionado)
-    if (tecnico) onSuccess(tecnico)
-    setGuardando(false)
+    setError(null)
+    try {
+      await axiosInstance.patch(`/tickets/${ticketId}`, { tecnico_id: seleccionado })
+      const tecnico = tecnicos.find(t => t.id === seleccionado)
+      if (tecnico) onSuccess(tecnico)
+    } catch {
+      setError('No se pudo asignar el técnico. Intentá de nuevo.')
+      setGuardando(false)
+    }
   }
 
   return (
@@ -180,7 +188,7 @@ function AsignarTecnicoModal({ onClose, onSuccess }: {
           >
             Cancelar
           </button>
-          {!loading && !error && tecnicos.length > 0 && (
+          {!loading && tecnicos.length > 0 && (
             <button
               onClick={handleConfirmar}
               disabled={!seleccionado || guardando}
@@ -195,7 +203,7 @@ function AsignarTecnicoModal({ onClose, onSuccess }: {
   )
 }
 
-
+// ─── Componentes auxiliares ───────────────────────────────────────────────────
 
 function TicketProgress({ estado }: { estado: string }) {
   const currentIdx = ESTADO_ORDER.indexOf(estado as never)
@@ -286,6 +294,7 @@ export default function TicketDetailPage() {
       )}
       {modalTecnico && (
         <AsignarTecnicoModal
+          ticketId={ticket.id}
           onClose={() => setModalTecnico(false)}
           onSuccess={(tecnico) => {
             setTicket((prev) => prev ? {
