@@ -15,7 +15,7 @@ const TRANSICIONES: Record<TicketEstado, TicketEstado[]> = {
   abierto:        ['en_diagnostico'],
   en_diagnostico: ['en_proceso'],
   en_proceso:     ['resuelto'],
-  resuelto:       ['cerrado'],
+  resuelto:       [],
   cerrado:        [],
   cancelado:      [],
 }
