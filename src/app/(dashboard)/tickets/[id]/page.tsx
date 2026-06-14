@@ -11,9 +11,9 @@ import { getTecnicos } from '@/api/users'
 // ─── Modal Cambiar Estado ─────────────────────────────────────────────────────
 
 const TRANSICIONES: Record<TicketEstado, TicketEstado[]> = {
-  abierto:        ['en_diagnostico', 'cancelado'],
-  en_diagnostico: ['en_proceso', 'cancelado'],
-  en_proceso:     ['resuelto', 'cancelado'],
+  abierto:        ['en_diagnostico'],
+  en_diagnostico: ['en_proceso'],
+  en_proceso:     ['resuelto'],
   resuelto:       ['cerrado'],
   cerrado:        [],
   cancelado:      [],
