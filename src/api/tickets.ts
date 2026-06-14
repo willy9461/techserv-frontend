@@ -28,7 +28,7 @@ export async function updateTicketStatus(
   id: string,
   payload: UpdateTicketStatusPayload,
 ): Promise<Ticket> {
-  const { data } = await api.patch<Ticket>(`/tickets/${id}/status`, payload)
+  const { data } = await api.patch<Ticket>(`/tickets/${id}`, { estado: payload.estado })
   return data
 }
 
