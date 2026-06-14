@@ -1,41 +1,23 @@
 'use client'
 
+import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { EstadoBadge, UrgenciaBadge } from '@/components/shared/TicketCard'
-import { TicketEstado, TicketUrgencia } from '@/types/ticket'
+import { TicketListItem } from '@/types/ticket'
+import { getTickets } from '@/api/tickets'
 
-// ── Mock data ────────────────────────────────────────────────────────────────
-
-const MOCK_KPIS = {
-  ticketsAbiertos: 8,
-  ticketsEnProceso: 3,
-  resueltosDeLaSemana: 12,
-  tiempoPromedioHoras: 4.2,
-}
-
-const MOCK_TICKETS_RECIENTES = [
-  { id: 'a1b2c3d4-0001', titulo: 'Aire acondicionado no enfría',      cliente: 'Lucía Fernández',        tecnico: null,          estado: 'abierto'        as TicketEstado, urgencia: 'alta'  as TicketUrgencia, hace: 'hace 2h' },
-  { id: 'a1b2c3d4-0006', titulo: 'Red empresarial caída',             cliente: 'Empresa Textil Norteña', tecnico: 'A. Volponi',  estado: 'en_proceso'     as TicketEstado, urgencia: 'alta'  as TicketUrgencia, hace: 'hace 3h' },
-  { id: 'a1b2c3d4-0002', titulo: 'Lavadora no centrifuga',            cliente: 'Carlos Méndez',          tecnico: 'M. Jurado',   estado: 'en_diagnostico' as TicketEstado, urgencia: 'media' as TicketUrgencia, hace: 'hace 5h' },
-  { id: 'a1b2c3d4-0005', titulo: 'Heladera no congela',               cliente: 'Roberto Sosa',           tecnico: null,          estado: 'abierto'        as TicketEstado, urgencia: 'media' as TicketUrgencia, hace: 'hace 6h' },
-  { id: 'a1b2c3d4-0003', titulo: 'PC no arranca',                     cliente: 'Estudio Jurídico Pérez', tecnico: 'M. Sciotti',  estado: 'en_proceso'     as TicketEstado, urgencia: 'alta'  as TicketUrgencia, hace: 'hace 1d' },
-]
+// ── Mock técnicos ─────────────────────────────────────────────────────────────
 
 const MOCK_TECNICOS = [
-  { id: 't1', nombre: 'Martin Sciotti',    iniciales: 'MS', especialidad: 'Informático',     zona: 'CABA Centro',  disponible: false, ticketsActivos: 2 },
-  { id: 't2', nombre: 'Marcelo Jurado',    iniciales: 'MJ', especialidad: 'Electrodoméstico',zona: 'CABA Norte',   disponible: false, ticketsActivos: 1 },
-  { id: 't3', nombre: 'Alejandro Volponi', iniciales: 'AV', especialidad: 'Redes',           zona: 'GBA Oeste',    disponible: false, ticketsActivos: 1 },
-  { id: 't4', nombre: 'Julio Maine',       iniciales: 'JM', especialidad: 'HVAC',            zona: 'CABA Sur',     disponible: true,  ticketsActivos: 0 },
+  { id: 't1', nombre: 'Martin Sciotti',    iniciales: 'MS', zona: 'CABA Centro',  disponible: false, ticketsActivos: 2 },
+  { id: 't2', nombre: 'Marcelo Jurado',    iniciales: 'MJ', zona: 'CABA Norte',   disponible: false, ticketsActivos: 1 },
+  { id: 't3', nombre: 'Alejandro Volponi', iniciales: 'AV', zona: 'GBA Oeste',    disponible: false, ticketsActivos: 1 },
+  { id: 't4', nombre: 'Julio Maine',       iniciales: 'JM', zona: 'CABA Sur',     disponible: true,  ticketsActivos: 0 },
 ]
 
 // ── KPI Card ─────────────────────────────────────────────────────────────────
 
-function KPICard({
-  label,
-  value,
-  sub,
-  accent,
-}: {
+function KPICard({ label, value, sub, accent }: {
   label: string
   value: string | number
   sub?: string
@@ -60,43 +42,69 @@ function KPICard({
 // ── Page ─────────────────────────────────────────────────────────────────────
 
 export default function DashboardPage() {
-  const sinAsignar = MOCK_TICKETS_RECIENTES.filter(t => !t.tecnico).length
+  const [tickets, setTickets] = useState<TicketListItem[]>([])
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    getTickets()
+      .then(setTickets)
+      .catch(() => {})
+      .finally(() => setLoading(false))
+  }, [])
+
+  const ticketsAbiertos = tickets.filter(t => t.estado === 'abierto').length
+  const ticketsEnProceso = tickets.filter(t => t.estado === 'en_proceso').length
+  const ticketsResueltos = tickets.filter(t => t.estado === 'resuelto').length
+  const sinAsignar = tickets.filter(t => !t.tecnico_nombre).length
+  const recientes = tickets.slice(0, 5)
+
+  const today = new Date().toLocaleDateString('es-AR', {
+    weekday: 'long', day: 'numeric', month: 'long', year: 'numeric'
+  })
 
   return (
     <div className="space-y-6">
       {/* Header */}
       <div>
         <h1 className="text-lg font-semibold text-white">Panel de control</h1>
-        <p className="text-sm text-zinc-500 mt-0.5">Viernes 29 de mayo, 2026</p>
+        <p className="text-sm text-zinc-500 mt-0.5 capitalize">{today}</p>
       </div>
 
       {/* KPIs */}
-      <div className="grid grid-cols-4 gap-4">
-        <KPICard
-          label="Tickets abiertos"
-          value={MOCK_KPIS.ticketsAbiertos}
-          sub={`${sinAsignar} sin asignar`}
-          accent="blue"
-        />
-        <KPICard
-          label="En proceso"
-          value={MOCK_KPIS.ticketsEnProceso}
-          sub="técnicos en campo"
-          accent="amber"
-        />
-        <KPICard
-          label="Resueltos esta semana"
-          value={MOCK_KPIS.resueltosDeLaSemana}
-          sub="últimos 7 días"
-          accent="emerald"
-        />
-        <KPICard
-          label="Tiempo promedio"
-          value={`${MOCK_KPIS.tiempoPromedioHoras}h`}
-          sub="resolución por ticket"
-          accent="violet"
-        />
-      </div>
+      {loading ? (
+        <div className="grid grid-cols-4 gap-4">
+          {[...Array(4)].map((_, i) => (
+            <div key={i} className="bg-zinc-900 border border-zinc-800 rounded-lg p-5 h-24 animate-pulse" />
+          ))}
+        </div>
+      ) : (
+        <div className="grid grid-cols-4 gap-4">
+          <KPICard
+            label="Tickets abiertos"
+            value={ticketsAbiertos}
+            sub={`${sinAsignar} sin asignar`}
+            accent="blue"
+          />
+          <KPICard
+            label="En proceso"
+            value={ticketsEnProceso}
+            sub="técnicos en campo"
+            accent="amber"
+          />
+          <KPICard
+            label="Resueltos"
+            value={ticketsResueltos}
+            sub="total acumulado"
+            accent="emerald"
+          />
+          <KPICard
+            label="Total tickets"
+            value={tickets.length}
+            sub="en el sistema"
+            accent="violet"
+          />
+        </div>
+      )}
 
       <div className="grid grid-cols-3 gap-4">
         {/* Tickets recientes */}
@@ -110,26 +118,35 @@ export default function DashboardPage() {
             </Link>
           </div>
           <div className="divide-y divide-zinc-800">
-            {MOCK_TICKETS_RECIENTES.map((t) => (
-              <Link key={t.id} href={`/tickets/${t.id}`}>
-                <div className="flex items-center gap-4 px-5 py-3.5 hover:bg-zinc-800/40 transition-colors cursor-pointer">
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm text-zinc-200 truncate">{t.titulo}</p>
-                    <p className="text-xs text-zinc-500 mt-0.5">{t.cliente}</p>
+            {loading ? (
+              <div className="px-5 py-8 text-center">
+                <div className="w-5 h-5 border-2 border-zinc-600 border-t-blue-500 rounded-full animate-spin mx-auto" />
+              </div>
+            ) : recientes.length === 0 ? (
+              <div className="px-5 py-8 text-center text-sm text-zinc-500">
+                No hay tickets registrados.
+              </div>
+            ) : (
+              recientes.map((t) => (
+                <Link key={t.id} href={`/tickets/${t.id}`}>
+                  <div className="flex items-center gap-4 px-5 py-3.5 hover:bg-zinc-800/40 transition-colors cursor-pointer">
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm text-zinc-200 truncate">{t.titulo}</p>
+                      <p className="text-xs text-zinc-500 mt-0.5">{t.cliente_nombre}</p>
+                    </div>
+                    <div className="flex items-center gap-3 shrink-0">
+                      {t.tecnico_nombre ? (
+                        <span className="text-xs text-zinc-500">{t.tecnico_nombre}</span>
+                      ) : (
+                        <span className="text-xs text-amber-500 font-medium">Sin asignar</span>
+                      )}
+                      <UrgenciaBadge urgencia={t.urgencia} />
+                      <EstadoBadge estado={t.estado} />
+                    </div>
                   </div>
-                  <div className="flex items-center gap-3 shrink-0">
-                    {t.tecnico ? (
-                      <span className="text-xs text-zinc-500">{t.tecnico}</span>
-                    ) : (
-                      <span className="text-xs text-amber-500 font-medium">Sin asignar</span>
-                    )}
-                    <UrgenciaBadge urgencia={t.urgencia} />
-                    <EstadoBadge estado={t.estado} />
-                    <span className="text-xs text-zinc-600 w-16 text-right">{t.hace}</span>
-                  </div>
-                </div>
-              </Link>
-            ))}
+                </Link>
+              ))
+            )}
           </div>
           <div className="px-5 py-3 border-t border-zinc-800">
             <Link href="/tickets/nuevo">
