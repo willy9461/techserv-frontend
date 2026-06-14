@@ -1,41 +1,10 @@
 'use client'
 
-import { useState } from 'react'
-import { MiTicket, TicketEstado } from '@/types/ticket'
+import { useEffect, useState } from 'react'
+import { TicketListItem, TicketEstado } from '@/types/ticket'
 import { EstadoBadge, UrgenciaBadge } from '@/components/shared/TicketCard'
+import { getTickets } from '@/api/tickets'
 import Link from 'next/link'
-
-const MOCK_MIS_TICKETS: MiTicket[] = [
-  {
-    id: 'TK-001',
-    titulo: 'Aire acondicionado no enfría',
-    descripcion: 'El equipo enciende pero no baja la temperatura.',
-    estado: 'en_proceso',
-    urgencia: 'alta',
-    createdAt: '2026-05-20T10:00:00Z',
-    tecnico: { nombre: 'Carlos Méndez', especialidad: 'HVAC' },
-    equipo: { tipo: 'hvac', marca: 'Carrier', modelo: 'XC21' },
-  },
-  {
-    id: 'TK-002',
-    titulo: 'PC no enciende',
-    descripcion: 'Al presionar el botón de encendido no hay respuesta.',
-    estado: 'abierto',
-    urgencia: 'media',
-    createdAt: '2026-05-25T09:30:00Z',
-    equipo: { tipo: 'informatico', marca: 'Dell', modelo: 'OptiPlex 7090' },
-  },
-  {
-    id: 'TK-003',
-    titulo: 'Heladera no congela',
-    descripcion: 'El freezer perdió temperatura progresivamente.',
-    estado: 'resuelto',
-    urgencia: 'baja',
-    createdAt: '2026-05-10T14:00:00Z',
-    tecnico: { nombre: 'Laura Giménez', especialidad: 'Electrodomésticos' },
-    equipo: { tipo: 'electrodomestico', marca: 'Whirlpool', modelo: 'WRB543' },
-  },
-]
 
 const FILTROS: { label: string; value: TicketEstado | 'todos' }[] = [
   { label: 'Todos', value: 'todos' },
@@ -46,11 +15,20 @@ const FILTROS: { label: string; value: TicketEstado | 'todos' }[] = [
 ]
 
 export default function MisTicketsPage() {
+  const [tickets, setTickets] = useState<TicketListItem[]>([])
+  const [loading, setLoading] = useState(true)
   const [filtro, setFiltro] = useState<TicketEstado | 'todos'>('todos')
 
-  const tickets = filtro === 'todos'
-    ? MOCK_MIS_TICKETS
-    : MOCK_MIS_TICKETS.filter(t => t.estado === filtro)
+  useEffect(() => {
+    getTickets()
+      .then(setTickets)
+      .catch(() => {})
+      .finally(() => setLoading(false))
+  }, [])
+
+  const filtered = filtro === 'todos'
+    ? tickets
+    : tickets.filter(t => t.estado === filtro)
 
   return (
     <div className="p-6 max-w-4xl mx-auto">
@@ -77,21 +55,25 @@ export default function MisTicketsPage() {
       </div>
 
       {/* Lista */}
-      {tickets.length === 0 ? (
+      {loading ? (
+        <div className="flex justify-center py-16">
+          <div className="w-6 h-6 border-2 border-zinc-600 border-t-blue-500 rounded-full animate-spin" />
+        </div>
+      ) : filtered.length === 0 ? (
         <div className="text-center py-16 text-zinc-500">
           No tenés solicitudes en este estado.
         </div>
       ) : (
         <div className="flex flex-col gap-4">
-          {tickets.map(ticket => (
+          {filtered.map(ticket => (
             <Link
               key={ticket.id}
-              href={`/mis-tickets/${ticket.id}`}
+              href={`/tickets/${ticket.id}`}
               className="block bg-zinc-900 border border-zinc-800 rounded-xl p-5 hover:border-zinc-600 transition-colors"
             >
               <div className="flex items-start justify-between gap-4 mb-3">
                 <div>
-                  <span className="text-xs text-zinc-500 font-mono">{ticket.id}</span>
+                  <span className="text-xs text-zinc-500 font-mono">{ticket.id.slice(0, 8).toUpperCase()}</span>
                   <h2 className="text-base font-medium text-white mt-0.5">{ticket.titulo}</h2>
                 </div>
                 <div className="flex gap-2 shrink-0">
@@ -100,18 +82,16 @@ export default function MisTicketsPage() {
                 </div>
               </div>
 
-              <p className="text-sm text-zinc-400 mb-4 line-clamp-2">{ticket.descripcion}</p>
-
               <div className="flex items-center justify-between text-xs text-zinc-500">
                 <div className="flex gap-4">
-                  {ticket.equipo && (
-                    <span>{ticket.equipo.marca} {ticket.equipo.modelo}</span>
-                  )}
-                  {ticket.tecnico && (
-                    <span>Técnico: <span className="text-zinc-300">{ticket.tecnico.nombre}</span></span>
+                  <span>{ticket.equipo_tipo}</span>
+                  {ticket.tecnico_nombre ? (
+                    <span>Técnico: <span className="text-zinc-300">{ticket.tecnico_nombre}</span></span>
+                  ) : (
+                    <span className="text-amber-500">Sin asignar</span>
                   )}
                 </div>
-                <span>{new Date(ticket.createdAt).toLocaleDateString('es-AR')}</span>
+                <span>{new Date(ticket.created_at).toLocaleDateString('es-AR')}</span>
               </div>
             </Link>
           ))}
