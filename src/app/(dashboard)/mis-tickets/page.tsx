@@ -11,7 +11,6 @@ const FILTROS: { label: string; value: TicketEstado | 'todos' }[] = [
   { label: 'Abiertos', value: 'abierto' },
   { label: 'En proceso', value: 'en_proceso' },
   { label: 'Resueltos', value: 'resuelto' },
-  { label: 'Cerrados', value: 'cerrado' },
 ]
 
 export default function MisTicketsPage() {

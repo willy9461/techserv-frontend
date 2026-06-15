@@ -8,8 +8,6 @@ const ESTADO_STYLES: Record<TicketEstado, { bg: string; text: string; dot: strin
   en_diagnostico: { bg: 'bg-amber-500/10',   text: 'text-amber-400',  dot: 'bg-amber-400' },
   en_proceso:     { bg: 'bg-violet-500/10',  text: 'text-violet-400', dot: 'bg-violet-400' },
   resuelto:       { bg: 'bg-emerald-500/10', text: 'text-emerald-400',dot: 'bg-emerald-400' },
-  cerrado:        { bg: 'bg-zinc-500/10',    text: 'text-zinc-400',   dot: 'bg-zinc-500' },
-  cancelado:      { bg: 'bg-red-500/10',     text: 'text-red-400',    dot: 'bg-red-400' },
 }
 
 const URGENCIA_STYLES: Record<TicketUrgencia, { border: string; text: string; label: string }> = {
