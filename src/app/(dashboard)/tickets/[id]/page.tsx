@@ -16,8 +16,6 @@ const TRANSICIONES: Record<TicketEstado, TicketEstado[]> = {
   en_diagnostico: ['en_proceso'],
   en_proceso:     ['resuelto'],
   resuelto:       [],
-  cerrado:        [],
-  cancelado:      [],
 }
 
 function CambiarEstadoModal({ ticket, onClose, onSuccess }: {

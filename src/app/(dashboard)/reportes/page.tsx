@@ -4,15 +4,13 @@ import { useEffect, useState } from 'react'
 import { getTickets } from '@/api/tickets'
 import { TicketListItem, TicketEstado, ESTADO_LABELS } from '@/types/ticket'
 
-const ESTADOS: TicketEstado[] = ['abierto', 'en_diagnostico', 'en_proceso', 'resuelto', 'cerrado']
+const ESTADOS: TicketEstado[] = ['abierto', 'en_diagnostico', 'en_proceso', 'resuelto']
 
 const ESTADO_COLORS: Record<TicketEstado, string> = {
   abierto:        'bg-blue-500',
   en_diagnostico: 'bg-amber-500',
   en_proceso:     'bg-violet-500',
   resuelto:       'bg-emerald-500',
-  cerrado:        'bg-zinc-500',
-  cancelado:      'bg-red-500',
 }
 
 function StatCard({ label, value, sub }: { label: string; value: number | string; sub?: string }) {
@@ -131,7 +129,6 @@ export default function ReportesPage() {
         )}
       </div>
 
-      {/* Nota */}
       <p className="text-xs text-zinc-600 text-center">
         Reportes avanzados con exportación a PDF y Excel disponibles próximamente.
       </p>
