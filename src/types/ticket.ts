@@ -3,8 +3,6 @@ export type TicketEstado =
   | 'en_diagnostico'
   | 'en_proceso'
   | 'resuelto'
-  | 'cerrado'
-  | 'cancelado'
 
 export type TicketUrgencia = 'baja' | 'media' | 'alta'
 
@@ -15,14 +13,6 @@ export type TipoEquipo =
   | 'informatico'
   | 'otro'
 
-export interface Cliente {
-  id: string
-  full_name: string
-  email: string
-  phone?: string
-  direccion?: string
-}
-
 export interface Tecnico {
   id: string
   full_name: string
@@ -31,6 +21,14 @@ export interface Tecnico {
   zona?: string
   disponible?: boolean
   avatarUrl?: string
+}
+
+export interface Cliente {
+  id: string
+  full_name: string
+  email: string
+  phone?: string
+  direccion?: string
 }
 
 export interface Equipo {
@@ -86,8 +84,6 @@ export const ESTADO_LABELS: Record<TicketEstado, string> = {
   en_diagnostico: 'En diagnóstico',
   en_proceso: 'En proceso',
   resuelto: 'Resuelto',
-  cerrado: 'Cerrado',
-  cancelado: 'Cancelado',
 }
 
 export const URGENCIA_LABELS: Record<TicketUrgencia, string> = {
@@ -109,8 +105,8 @@ export const ESTADO_ORDER: TicketEstado[] = [
   'en_diagnostico',
   'en_proceso',
   'resuelto',
-  'cerrado',
 ]
+
 // Vista cliente
 export interface MiTicket {
   id: string
@@ -129,6 +125,7 @@ export interface MiTicket {
     modelo: string
   }
 }
+
 export interface MiEquipo {
   id: string
   tipo: TipoEquipo
