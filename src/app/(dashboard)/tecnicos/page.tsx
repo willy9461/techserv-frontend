@@ -1,14 +1,14 @@
 'use client'
 
 import { useState, useMemo } from 'react'
-import { Tecnico, TipoEquipo } from '@/types/ticket'
+import { Tecnico } from '@/types/ticket'
 
 const ESPECIALIDADES = ['Todos', 'HVAC', 'Informático', 'Electrodomésticos', 'Industrial']
 
 const MOCK_TECNICOS: Tecnico[] = [
   {
     id: 'tec-001',
-    nombre: 'Carlos Méndez',
+    full_name: 'Carlos Méndez',
     email: 'c.mendez@techserv.com',
     especialidad: 'HVAC',
     zona: 'CABA Norte',
@@ -16,7 +16,7 @@ const MOCK_TECNICOS: Tecnico[] = [
   },
   {
     id: 'tec-002',
-    nombre: 'Laura Giménez',
+    full_name: 'Laura Giménez',
     email: 'l.gimenez@techserv.com',
     especialidad: 'Electrodomésticos',
     zona: 'GBA Oeste',
@@ -24,7 +24,7 @@ const MOCK_TECNICOS: Tecnico[] = [
   },
   {
     id: 'tec-003',
-    nombre: 'Martin Sciotti',
+    full_name: 'Martin Sciotti',
     email: 'm.sciotti@techserv.com',
     especialidad: 'Informático',
     zona: 'CABA Centro',
@@ -32,7 +32,7 @@ const MOCK_TECNICOS: Tecnico[] = [
   },
   {
     id: 'tec-004',
-    nombre: 'Roberto Paz',
+    full_name: 'Roberto Paz',
     email: 'r.paz@techserv.com',
     especialidad: 'Industrial',
     zona: 'GBA Sur',
@@ -40,7 +40,7 @@ const MOCK_TECNICOS: Tecnico[] = [
   },
   {
     id: 'tec-005',
-    nombre: 'Ana Rodríguez',
+    full_name: 'Ana Rodríguez',
     email: 'a.rodriguez@techserv.com',
     especialidad: 'HVAC',
     zona: 'CABA Sur',
@@ -49,7 +49,7 @@ const MOCK_TECNICOS: Tecnico[] = [
 ]
 
 function TecnicoCard({ tecnico }: { tecnico: Tecnico }) {
-  const initials = tecnico.nombre.split(' ').map(n => n[0]).join('').slice(0, 2)
+  const initials = tecnico.full_name.split(' ').map(n => n[0]).join('').slice(0, 2)
 
   return (
     <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-5 flex flex-col gap-4 hover:border-zinc-700 transition-colors">
@@ -59,7 +59,7 @@ function TecnicoCard({ tecnico }: { tecnico: Tecnico }) {
             {initials}
           </div>
           <div>
-            <p className="text-sm font-medium text-white">{tecnico.nombre}</p>
+            <p className="text-sm font-medium text-white">{tecnico.full_name}</p>
             <p className="text-xs text-zinc-500 mt-0.5">{tecnico.email}</p>
           </div>
         </div>
@@ -99,8 +99,8 @@ export default function TecnicosPage() {
     return MOCK_TECNICOS.filter(t => {
       const matchSearch =
         search === '' ||
-        t.nombre.toLowerCase().includes(search.toLowerCase()) ||
-        t.zona.toLowerCase().includes(search.toLowerCase())
+        t.full_name.toLowerCase().includes(search.toLowerCase()) ||
+        (t.zona ?? '').toLowerCase().includes(search.toLowerCase())
       const matchEspecialidad =
         especialidadFiltro === 'Todos' || t.especialidad === especialidadFiltro
       const matchDisponible = !soloDisponibles || t.disponible
@@ -112,7 +112,6 @@ export default function TecnicosPage() {
 
   return (
     <div className="space-y-6">
-      {/* Header */}
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-lg font-semibold text-white">Técnicos</h1>
@@ -122,7 +121,6 @@ export default function TecnicosPage() {
         </div>
       </div>
 
-      {/* Filtros */}
       <div className="flex flex-wrap items-center gap-3">
         <div className="relative flex-1 max-w-sm">
           <svg className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-500" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -159,7 +157,6 @@ export default function TecnicosPage() {
         </button>
       </div>
 
-      {/* Grid */}
       {filtered.length === 0 ? (
         <div className="text-center py-16 text-zinc-500">
           <p className="text-sm">No se encontraron técnicos con esos filtros.</p>
