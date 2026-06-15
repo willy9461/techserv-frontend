@@ -12,7 +12,7 @@ import {
 } from '@/types/ticket'
 import { getTickets } from '@/api/tickets'
 
-const ESTADOS: TicketEstado[] = ['abierto', 'en_diagnostico', 'en_proceso', 'resuelto', 'cerrado', 'cancelado']
+const ESTADOS: TicketEstado[] = ['abierto', 'en_diagnostico', 'en_proceso', 'resuelto']
 const URGENCIAS: TicketUrgencia[] = ['alta', 'media', 'baja']
 type ViewMode = 'cards' | 'table'
 

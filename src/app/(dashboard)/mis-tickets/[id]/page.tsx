@@ -27,10 +27,9 @@ const PASOS: { estado: TicketEstado; label: string }[] = [
   { estado: 'en_diagnostico', label: 'Diagnóstico' },
   { estado: 'en_proceso', label: 'En proceso' },
   { estado: 'resuelto', label: 'Resuelto' },
-  { estado: 'cerrado', label: 'Cerrado' },
 ]
 
-const ORDEN: TicketEstado[] = ['abierto', 'en_diagnostico', 'en_proceso', 'resuelto', 'cerrado']
+const ORDEN: TicketEstado[] = ['abierto', 'en_diagnostico', 'en_proceso', 'resuelto']
 
 export default function MiTicketDetallePage({ params }: { params: { id: string } }) {
   const ticket = MOCK_TICKET_DETALLE

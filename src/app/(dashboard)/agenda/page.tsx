@@ -41,8 +41,6 @@ const ESTADO_BADGE: Record<TicketEstado, string> = {
   en_diagnostico: 'bg-purple-500/10 text-purple-400',
   en_proceso: 'bg-yellow-500/10 text-yellow-400',
   resuelto: 'bg-green-500/10 text-green-400',
-  cerrado: 'bg-zinc-500/10 text-zinc-400',
-  cancelado: 'bg-red-500/10 text-red-400',
 }
 
 export default function AgendaPage() {
