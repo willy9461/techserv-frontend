@@ -112,7 +112,6 @@ export default function TecnicosPage() {
 
   return (
     <div className="space-y-6">
-      {/* Header */}
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-lg font-semibold text-white">Técnicos</h1>
@@ -122,7 +121,6 @@ export default function TecnicosPage() {
         </div>
       </div>
 
-      {/* Filtros */}
       <div className="flex flex-wrap items-center gap-3">
         <div className="relative flex-1 max-w-sm">
           <svg className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-500" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -159,7 +157,6 @@ export default function TecnicosPage() {
         </button>
       </div>
 
-      {/* Grid */}
       {filtered.length === 0 ? (
         <div className="text-center py-16 text-zinc-500">
           <p className="text-sm">No se encontraron técnicos con esos filtros.</p>
