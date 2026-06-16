@@ -59,7 +59,7 @@ export default function AgendaPage() {
   const ticketsPorDia = useMemo(() => {
     const map: Partial<Record<DayOfWeek, TicketListItem[]>> = {}
     tickets.forEach((t) => {
-      const fecha = new Date(t.created_at)
+      const fecha = new Date(t.fecha_creacion ?? new Date().toISOString())  // ← fix
       const dia = DIA_INDEX[fecha.getDay()]
       if (!map[dia]) map[dia] = []
       map[dia]!.push(t)
@@ -149,7 +149,7 @@ export default function AgendaPage() {
                 <div className="flex items-start gap-4">
                   <div className="text-center min-w-[48px]">
                     <p className="text-lg font-bold text-white">
-                      {new Date(ticket.created_at).toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit' })}
+                      {new Date(ticket.fecha_creacion ?? new Date().toISOString()).toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit' })}  {/* ← fix */}
                     </p>
                   </div>
                   <div className="space-y-1">
