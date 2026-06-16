@@ -5,15 +5,7 @@ import Link from 'next/link'
 import { EstadoBadge, UrgenciaBadge } from '@/components/shared/TicketCard'
 import { TicketListItem } from '@/types/ticket'
 import { getTickets } from '@/api/tickets'
-
-// ── Mock técnicos ─────────────────────────────────────────────────────────────
-
-const MOCK_TECNICOS = [
-  { id: 't1', nombre: 'Martin Sciotti',    iniciales: 'MS', zona: 'CABA Centro',  disponible: false, ticketsActivos: 2 },
-  { id: 't2', nombre: 'Marcelo Jurado',    iniciales: 'MJ', zona: 'CABA Norte',   disponible: false, ticketsActivos: 1 },
-  { id: 't3', nombre: 'Alejandro Volponi', iniciales: 'AV', zona: 'GBA Oeste',    disponible: false, ticketsActivos: 1 },
-  { id: 't4', nombre: 'Julio Maine',       iniciales: 'JM', zona: 'CABA Sur',     disponible: true,  ticketsActivos: 0 },
-]
+import { getTecnicos, TecnicoAPI } from '@/api/users'
 
 // ── KPI Card ─────────────────────────────────────────────────────────────────
 
@@ -43,13 +35,20 @@ function KPICard({ label, value, sub, accent }: {
 
 export default function DashboardPage() {
   const [tickets, setTickets] = useState<TicketListItem[]>([])
+  const [tecnicos, setTecnicos] = useState<TecnicoAPI[]>([])
   const [loading, setLoading] = useState(true)
+  const [loadingTecnicos, setLoadingTecnicos] = useState(true)
 
   useEffect(() => {
     getTickets()
       .then(setTickets)
       .catch(() => {})
       .finally(() => setLoading(false))
+
+    getTecnicos()
+      .then(setTecnicos)
+      .catch(() => {})
+      .finally(() => setLoadingTecnicos(false))
   }, [])
 
   const ticketsAbiertos = tickets.filter(t => t.estado === 'abierto').length
@@ -57,6 +56,7 @@ export default function DashboardPage() {
   const ticketsResueltos = tickets.filter(t => t.estado === 'resuelto').length
   const sinAsignar = tickets.filter(t => !t.tecnico_nombre).length
   const recientes = tickets.slice(0, 5)
+  const tecnicosActivos = tecnicos.filter(t => t.is_active)
 
   const today = new Date().toLocaleDateString('es-AR', {
     weekday: 'long', day: 'numeric', month: 'long', year: 'numeric'
@@ -171,27 +171,33 @@ export default function DashboardPage() {
             </Link>
           </div>
           <div className="divide-y divide-zinc-800">
-            {MOCK_TECNICOS.map((t) => (
-              <div key={t.id} className="flex items-center gap-3 px-5 py-3.5">
-                <div className="relative shrink-0">
-                  <div className="w-8 h-8 rounded-full bg-zinc-700 flex items-center justify-center text-xs font-medium text-zinc-300">
-                    {t.iniciales}
-                  </div>
-                  <span className={`absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 rounded-full border-2 border-zinc-900 ${t.disponible ? 'bg-emerald-500' : 'bg-zinc-600'}`} />
-                </div>
-                <div className="flex-1 min-w-0">
-                  <p className="text-sm text-zinc-200 truncate">{t.nombre}</p>
-                  <p className="text-xs text-zinc-500">{t.zona}</p>
-                </div>
-                <div className="shrink-0 text-right">
-                  {t.ticketsActivos > 0 ? (
-                    <span className="text-xs font-medium text-amber-400">{t.ticketsActivos} activo{t.ticketsActivos > 1 ? 's' : ''}</span>
-                  ) : (
-                    <span className="text-xs text-emerald-400">Libre</span>
-                  )}
-                </div>
+            {loadingTecnicos ? (
+              <div className="px-5 py-8 text-center">
+                <div className="w-5 h-5 border-2 border-zinc-600 border-t-blue-500 rounded-full animate-spin mx-auto" />
               </div>
-            ))}
+            ) : tecnicosActivos.length === 0 ? (
+              <div className="px-5 py-8 text-center text-sm text-zinc-500">
+                No hay técnicos registrados.
+              </div>
+            ) : (
+              tecnicosActivos.slice(0, 5).map((t) => {
+                const initials = t.full_name.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase()
+                return (
+                  <div key={t.id} className="flex items-center gap-3 px-5 py-3.5">
+                    <div className="relative shrink-0">
+                      <div className="w-8 h-8 rounded-full bg-zinc-700 flex items-center justify-center text-xs font-medium text-zinc-300">
+                        {initials}
+                      </div>
+                      <span className="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 rounded-full border-2 border-zinc-900 bg-emerald-500" />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm text-zinc-200 truncate">{t.full_name}</p>
+                      <p className="text-xs text-zinc-500">{t.phone ?? t.email}</p>
+                    </div>
+                  </div>
+                )
+              })
+            )}
           </div>
         </div>
       </div>
