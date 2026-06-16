@@ -59,7 +59,7 @@ export interface TicketListItem {
   titulo: string
   estado: TicketEstado
   urgencia: TicketUrgencia
-  created_at: string
+  fecha_creacion: string | null
   cliente_nombre: string
   tecnico_nombre?: string
   equipo_tipo: TipoEquipo

@@ -42,9 +42,11 @@ interface TicketCardProps {
 
 export function TicketCard({ ticket, className = '' }: TicketCardProps) {
   const urgencia = URGENCIA_STYLES[ticket.urgencia]
-  const fecha = new Date(ticket.created_at).toLocaleDateString('es-AR', {
-    day: '2-digit', month: 'short', year: 'numeric',
-  })
+  const fecha = ticket.fecha_creacion
+    ? new Date(ticket.fecha_creacion).toLocaleDateString('es-AR', {
+        day: '2-digit', month: 'short', year: 'numeric',
+      })
+    : null
 
   return (
     <Link href={`/tickets/${ticket.id}`}>
@@ -70,7 +72,7 @@ export function TicketCard({ ticket, className = '' }: TicketCardProps) {
           </div>
           <div className="flex items-center gap-3 shrink-0">
             <UrgenciaBadge urgencia={ticket.urgencia} />
-            <span>{fecha}</span>
+            {fecha && <span>{fecha}</span>}
           </div>
         </div>
       </div>
@@ -83,9 +85,11 @@ interface TicketRowProps {
 }
 
 export function TicketRow({ ticket }: TicketRowProps) {
-  const fecha = new Date(ticket.created_at).toLocaleDateString('es-AR', {
-    day: '2-digit', month: 'short',
-  })
+  const fecha = ticket.fecha_creacion
+    ? new Date(ticket.fecha_creacion).toLocaleDateString('es-AR', {
+        day: '2-digit', month: 'short',
+      })
+    : '—'
 
   return (
     <Link href={`/tickets/${ticket.id}`}>
