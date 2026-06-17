@@ -17,9 +17,15 @@ const useAuthStore = create<AuthState>()(
       user: null,
       token: null,
       isLoading: false,
-      setAuth: (user, token) => set({ user, token }),
+      setAuth: (user, token) => {
+        document.cookie = `techserv-role=${user.role}; path=/; max-age=86400; SameSite=Lax`
+        set({ user, token })
+      },
       setIsLoading: (isLoading) => set({ isLoading }),
-      clearAuth: () => set({ user: null, token: null }),
+      clearAuth: () => {
+        document.cookie = 'techserv-role=; path=/; max-age=0'
+        set({ user: null, token: null })
+      },
     }),
     {
       name: 'techserv-auth',
