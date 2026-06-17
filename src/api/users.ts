@@ -61,3 +61,13 @@ export async function getClientes(): Promise<ClienteAPI[]> {
   const { data } = await axiosInstance.get<ClienteAPI[]>('/users/clientes')
   return data
 }
+
+export async function getUsuarios(): Promise<User[]> {
+  const { data } = await axiosInstance.get<User[]>('/users')
+  return data
+}
+
+export async function updateUsuario(id: string, payload: Partial<Pick<User, 'role' | 'is_active'>>): Promise<User> {
+  const { data } = await axiosInstance.patch<User>(`/users/${id}`, payload)
+  return data
+}
