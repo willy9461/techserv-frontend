@@ -158,18 +158,32 @@ function Sidebar() {
           </Link>
         )}
         <div className="flex items-center gap-3 px-3 py-2.5 mt-1">
-          <div className="w-7 h-7 rounded-full bg-zinc-700 flex items-center justify-center text-xs text-zinc-300 font-medium shrink-0">
-            {initials}
-          </div>
-          <div className="min-w-0">
-            <p className="text-xs font-medium text-zinc-300 truncate">
-              {user?.full_name ?? "Usuario"}
-            </p>
-            <p className="text-xs text-zinc-500">
-              {user ? (roleLabels[user.role] ?? user.role) : ""}
-            </p>
-          </div>
-        </div>
+  <div className="w-7 h-7 rounded-full bg-zinc-700 flex items-center justify-center text-xs text-zinc-300 font-medium shrink-0">
+    {initials}
+  </div>
+  <div className="min-w-0 flex-1">
+    <p className="text-xs font-medium text-zinc-300 truncate">
+      {user?.full_name ?? "Usuario"}
+    </p>
+    <p className="text-xs text-zinc-500">
+      {user ? (roleLabels[user.role] ?? user.role) : ""}
+    </p>
+  </div>
+  <button
+    onClick={() => {
+      useAuthStore.getState().clearAuth()
+      window.location.href = '/login'
+    }}
+    className="shrink-0 p-1.5 rounded-lg text-zinc-600 hover:text-zinc-300 hover:bg-zinc-800 transition-colors"
+    title="Cerrar sesión"
+  >
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+      <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+      <polyline points="16 17 21 12 16 7" />
+      <line x1="21" y1="12" x2="9" y2="12" />
+    </svg>
+  </button>
+</div>
       </div>
     </aside>
   );
