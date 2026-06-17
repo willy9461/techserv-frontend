@@ -90,7 +90,7 @@ export default function MisTicketsPage() {
                     <span className="text-amber-500">Sin asignar</span>
                   )}
                 </div>
-                <span>{new Date(ticket.created_at).toLocaleDateString('es-AR')}</span>
+                <span>{ticket.fecha_creacion ? new Date(ticket.fecha_creacion).toLocaleDateString('es-AR') : '—'}</span>
               </div>
             </Link>
           ))}
