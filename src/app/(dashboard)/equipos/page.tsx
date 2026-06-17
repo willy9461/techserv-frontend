@@ -23,8 +23,8 @@ export default function MisEquiposPage() {
   return (
     <div className="p-6 max-w-4xl mx-auto">
       <div className="mb-6">
-        <h1 className="text-2xl font-medium text-white mb-1">Mis equipos</h1>
-        <p className="text-sm text-zinc-400">Equipos registrados y su historial de intervenciones.</p>
+        <h1 className="text-2xl font-medium text-white mb-1">Equipos</h1>
+        <p className="text-sm text-zinc-400">registrados.</p>
       </div>
 
       {/* Búsqueda */}
