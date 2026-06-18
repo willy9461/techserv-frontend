@@ -23,6 +23,7 @@ interface RegisterData {
   password: string
   full_name: string
   role: string
+  phone: string
 }
 
 interface RegisterResponse {
