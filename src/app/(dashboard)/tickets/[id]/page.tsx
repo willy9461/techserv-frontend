@@ -315,7 +315,7 @@ const [fechaGuardada, setFechaGuardada] = useState(false)
       </div>
 
       {/* Título + acciones */}
-      <div className="flex items-start justify-between gap-4">
+      <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
         <div>
           <h1 className="text-xl font-semibold text-white">{ticket.titulo}</h1>
           <div className="flex items-center gap-3 mt-2">
@@ -328,7 +328,7 @@ const [fechaGuardada, setFechaGuardada] = useState(false)
             </span>
           </div>
         </div>
-        <div className="flex gap-2 shrink-0">
+        <div className="flex gap-2 sm:shrink-0">
           <button
             onClick={() => setModalTecnico(true)}
             className="px-3 py-2 bg-zinc-800 hover:bg-zinc-700 border border-zinc-700 text-zinc-300 text-sm rounded-lg transition-colors"
@@ -349,8 +349,8 @@ const [fechaGuardada, setFechaGuardada] = useState(false)
         <TicketProgress estado={ticket.estado} />
       </Section>
 
-      <div className="grid grid-cols-3 gap-4">
-        <div className="col-span-2 space-y-4">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+        <div className="col-span-1 lg:col-span-2 space-y-4">
           <Section title="Descripción">
             <p className="text-sm text-zinc-300 leading-relaxed">{ticket.descripcion}</p>
           </Section>
