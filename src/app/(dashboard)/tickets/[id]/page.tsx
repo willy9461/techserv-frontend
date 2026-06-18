@@ -8,6 +8,7 @@ import { Ticket, ESTADO_ORDER, ESTADO_LABELS, TicketEstado } from '@/types/ticke
 import { getTicketById, updateTicketStatus } from '@/api/tickets'
 import { getTecnicos } from '@/api/users'
 import axiosInstance from '@/lib/axios'
+import useAuthStore from '@/store/authStore'
 
 const TRANSICIONES: Record<TicketEstado, TicketEstado[]> = {
   abierto:        ['en_diagnostico'],
@@ -225,6 +226,9 @@ export default function TicketDetailPage() {
   const params = useParams()
   const id = params.id as string
 
+  const { user } = useAuthStore()
+  const esCliente = user?.role === 'cliente'
+
   const [ticket, setTicket] = useState<Ticket | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -268,7 +272,7 @@ export default function TicketDetailPage() {
 
   return (
     <div className="space-y-6 max-w-5xl">
-      {modalEstado && (
+      {!esCliente && modalEstado && (
         <CambiarEstadoModal
           ticket={ticket}
           onClose={() => setModalEstado(false)}
@@ -278,7 +282,7 @@ export default function TicketDetailPage() {
           }}
         />
       )}
-      {modalTecnico && (
+      {!esCliente && modalTecnico && (
         <AsignarTecnicoModal
           ticketId={ticket.id}
           onClose={() => setModalTecnico(false)}
@@ -311,20 +315,22 @@ export default function TicketDetailPage() {
             </span>
           </div>
         </div>
-        <div className="flex gap-2 sm:shrink-0">
-          <button
-            onClick={() => setModalTecnico(true)}
-            className="px-3 py-2 bg-zinc-800 hover:bg-zinc-700 border border-zinc-700 text-zinc-300 text-sm rounded-lg transition-colors"
-          >
-            Asignar técnico
-          </button>
-          <button
-            onClick={() => setModalEstado(true)}
-            className="px-3 py-2 bg-blue-500 hover:bg-blue-400 text-white text-sm font-medium rounded-lg transition-colors"
-          >
-            Cambiar estado
-          </button>
-        </div>
+        {!esCliente && (
+          <div className="flex gap-2 sm:shrink-0">
+            <button
+              onClick={() => setModalTecnico(true)}
+              className="px-3 py-2 bg-zinc-800 hover:bg-zinc-700 border border-zinc-700 text-zinc-300 text-sm rounded-lg transition-colors"
+            >
+              Asignar técnico
+            </button>
+            <button
+              onClick={() => setModalEstado(true)}
+              className="px-3 py-2 bg-blue-500 hover:bg-blue-400 text-white text-sm font-medium rounded-lg transition-colors"
+            >
+              Cambiar estado
+            </button>
+          </div>
+        )}
       </div>
 
       <Section title="Progreso">
@@ -386,41 +392,43 @@ export default function TicketDetailPage() {
             )}
           </Section>
 
-          <Section title="Fecha de visita">
-            <div className="space-y-2">
-              {fechaGuardada && fechaVisita && (
-                <p className="text-sm text-zinc-200">
-                  {new Date(fechaVisita + 'T12:00:00').toLocaleDateString('es-AR', {
-                    weekday: 'long', day: '2-digit', month: 'long', year: 'numeric',
-                  })}
-                </p>
-              )}
-              <input
-                type="date"
-                value={fechaVisita ?? ''}
-                onChange={(e) => { setFechaVisita(e.target.value); setFechaGuardada(false) }}
-                className="w-full bg-zinc-800 border border-zinc-700 rounded-lg px-3 py-2 text-sm text-zinc-200 focus:outline-none focus:border-zinc-600"
-              />
-              <button
-                onClick={async () => {
-                  if (!fechaVisita) return
-                  setGuardandoFecha(true)
-                  try {
-                    await axiosInstance.patch(`/tickets/${ticket.id}`, { fecha_visita: fechaVisita + 'T12:00:00' })
-                    setFechaGuardada(true)
-                  } catch {
-                    // podés agregar un mensaje de error acá si querés
-                  } finally {
-                    setGuardandoFecha(false)
-                  }
-                }}
-                disabled={!fechaVisita || guardandoFecha}
-                className="w-full px-3 py-2 bg-blue-500 hover:bg-blue-400 disabled:bg-zinc-700 disabled:text-zinc-500 text-white text-sm font-medium rounded-lg transition-colors"
-              >
-                {guardandoFecha ? 'Guardando...' : 'Guardar fecha'}
-              </button>
-            </div>
-          </Section>
+          {!esCliente && (
+            <Section title="Fecha de visita">
+              <div className="space-y-2">
+                {fechaGuardada && fechaVisita && (
+                  <p className="text-sm text-zinc-200">
+                    {new Date(fechaVisita + 'T12:00:00').toLocaleDateString('es-AR', {
+                      weekday: 'long', day: '2-digit', month: 'long', year: 'numeric',
+                    })}
+                  </p>
+                )}
+                <input
+                  type="date"
+                  value={fechaVisita ?? ''}
+                  onChange={(e) => { setFechaVisita(e.target.value); setFechaGuardada(false) }}
+                  className="w-full bg-zinc-800 border border-zinc-700 rounded-lg px-3 py-2 text-sm text-zinc-200 focus:outline-none focus:border-zinc-600"
+                />
+                <button
+                  onClick={async () => {
+                    if (!fechaVisita) return
+                    setGuardandoFecha(true)
+                    try {
+                      await axiosInstance.patch(`/tickets/${ticket.id}`, { fecha_visita: fechaVisita + 'T12:00:00' })
+                      setFechaGuardada(true)
+                    } catch {
+                      // podés agregar un mensaje de error acá si querés
+                    } finally {
+                      setGuardandoFecha(false)
+                    }
+                  }}
+                  disabled={!fechaVisita || guardandoFecha}
+                  className="w-full px-3 py-2 bg-blue-500 hover:bg-blue-400 disabled:bg-zinc-700 disabled:text-zinc-500 text-white text-sm font-medium rounded-lg transition-colors"
+                >
+                  {guardandoFecha ? 'Guardando...' : 'Guardar fecha'}
+                </button>
+              </div>
+            </Section>
+          )}
 
           <Section title="Dirección">
             <p className="text-sm text-zinc-300">{ticket.direccion}</p>
