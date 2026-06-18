@@ -250,6 +250,9 @@ export default function TicketDetailPage() {
   const [error, setError] = useState<string | null>(null)
   const [modalEstado, setModalEstado] = useState(false)
   const [modalTecnico, setModalTecnico] = useState(false)
+  const [fechaVisita, setFechaVisita] = useState<string | null>(null)
+const [guardandoFecha, setGuardandoFecha] = useState(false)
+const [fechaGuardada, setFechaGuardada] = useState(false)
 
   useEffect(() => {
     getTicketById(id)
@@ -400,6 +403,37 @@ export default function TicketDetailPage() {
               <p className="text-sm text-zinc-500 italic">Sin información del equipo.</p>
             )}
           </Section>
+
+          <Section title="Fecha de visita">
+  <div className="space-y-2">
+    {fechaGuardada && fechaVisita && (
+      <p className="text-sm text-zinc-200">
+        {// DESPUÉS
+new Date(fechaVisita + 'T12:00:00').toLocaleDateString('es-AR', {
+  weekday: 'long', day: '2-digit', month: 'long', year: 'numeric',
+})}
+      </p>
+    )}
+    <input
+      type="date"
+      value={fechaVisita ?? ''}
+      onChange={(e) => { setFechaVisita(e.target.value); setFechaGuardada(false) }}
+      className="w-full bg-zinc-800 border border-zinc-700 rounded-lg px-3 py-2 text-sm text-zinc-200 focus:outline-none focus:border-zinc-600"
+    />
+    <button
+      onClick={() => {
+        if (!fechaVisita) return
+        setGuardandoFecha(true)
+        // TODO: await api.patch(`/tickets/${ticket.id}`, { fecha_visita: fechaVisita })
+        setTimeout(() => { setGuardandoFecha(false); setFechaGuardada(true) }, 500)
+      }}
+      disabled={!fechaVisita || guardandoFecha}
+      className="w-full px-3 py-2 bg-blue-500 hover:bg-blue-400 disabled:bg-zinc-700 disabled:text-zinc-500 text-white text-sm font-medium rounded-lg transition-colors"
+    >
+      {guardandoFecha ? 'Guardando...' : 'Guardar fecha'}
+    </button>
+  </div>
+</Section>
 
           <Section title="Dirección">
             <p className="text-sm text-zinc-300">{ticket.direccion}</p>

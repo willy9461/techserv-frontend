@@ -21,7 +21,7 @@ export default function TicketsPage() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [search, setSearch] = useState('')
-  const [estadoFiltro, setEstadoFiltro] = useState<TicketEstado | 'todos'>('todos')
+const [estadoFiltro, setEstadoFiltro] = useState<TicketEstado | 'todos'>('todos')
   const [urgenciaFiltro, setUrgenciaFiltro] = useState<TicketUrgencia | 'todos'>('todos')
   const [viewMode, setViewMode] = useState<ViewMode>('cards')
 
@@ -39,7 +39,7 @@ export default function TicketsPage() {
         t.titulo.toLowerCase().includes(search.toLowerCase()) ||
         t.cliente_nombre.toLowerCase().includes(search.toLowerCase()) ||
         t.id.includes(search.toLowerCase())
-      const matchEstado = estadoFiltro === 'todos' || t.estado === estadoFiltro
+const matchEstado = estadoFiltro === 'todos' ? t.estado !== 'resuelto' : t.estado === estadoFiltro
       const matchUrgencia = urgenciaFiltro === 'todos' || t.urgencia === urgenciaFiltro
       return matchSearch && matchEstado && matchUrgencia
     })
