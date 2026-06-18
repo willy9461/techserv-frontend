@@ -47,6 +47,7 @@ export interface Ticket {
   urgencia: TicketUrgencia
   created_at?: string
   fecha_creacion?: string
+  fecha_visita?: string | null
   closed_at?: string
   cliente?: Cliente
   tecnico?: Tecnico
@@ -60,6 +61,7 @@ export interface TicketListItem {
   estado: TicketEstado
   urgencia: TicketUrgencia
   fecha_creacion: string | null
+  fecha_visita?: string | null
   cliente_nombre: string
   tecnico_nombre?: string
   equipo_tipo: TipoEquipo

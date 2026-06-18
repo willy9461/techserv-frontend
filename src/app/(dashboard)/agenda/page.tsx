@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useMemo, useEffect } from 'react'
+import Link from 'next/link'
 import {
   TicketListItem,
   TicketEstado,
@@ -59,7 +60,9 @@ export default function AgendaPage() {
   const ticketsPorDia = useMemo(() => {
     const map: Partial<Record<DayOfWeek, TicketListItem[]>> = {}
     tickets.forEach((t) => {
-      const fecha = new Date(t.fecha_creacion ?? new Date().toISOString())  // ← fix
+      const fecha = t.fecha_visita ? new Date(t.fecha_visita) : null
+      if (!fecha) return
+      if (t.estado === 'resuelto') return
       const dia = DIA_INDEX[fecha.getDay()]
       if (!map[dia]) map[dia] = []
       map[dia]!.push(t)
@@ -100,7 +103,6 @@ export default function AgendaPage() {
 
   return (
     <div className="space-y-6">
-      {/* Header */}
       <div>
         <h1 className="text-lg font-semibold text-white">Agenda semanal</h1>
         <p className="text-sm text-zinc-500 mt-0.5">
@@ -108,7 +110,6 @@ export default function AgendaPage() {
         </p>
       </div>
 
-      {/* Selector de días */}
       <div className="flex gap-2 flex-wrap">
         {DIAS.map((dia) => {
           const count = ticketsPorDia[dia]?.length ?? 0
@@ -133,7 +134,6 @@ export default function AgendaPage() {
         })}
       </div>
 
-      {/* Lista de turnos */}
       {ticketsDelDia.length === 0 ? (
         <div className="text-center py-16 text-zinc-500">
           <p className="text-sm">No hay turnos para el {diaSeleccionado}.</p>
@@ -141,35 +141,34 @@ export default function AgendaPage() {
       ) : (
         <div className="space-y-3">
           {ticketsDelDia.map((ticket) => (
-            <div
-              key={ticket.id}
-              className={`bg-zinc-900 border border-zinc-800 border-l-4 ${URGENCIA_COLORS[ticket.urgencia]} rounded-lg p-4`}
-            >
-              <div className="flex items-start justify-between gap-4">
-                <div className="flex items-start gap-4">
-                  <div className="text-center min-w-[48px]">
-                    <p className="text-lg font-bold text-white">
-                      {new Date(ticket.fecha_creacion ?? new Date().toISOString()).toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit' })}  {/* ← fix */}
-                    </p>
+            <Link href={`/tickets/${ticket.id}`} key={ticket.id}>
+              <div className={`bg-zinc-900 border border-zinc-800 border-l-4 ${URGENCIA_COLORS[ticket.urgencia]} rounded-lg p-4 hover:border-zinc-600 hover:bg-zinc-800/60 transition-all cursor-pointer`}>
+                <div className="flex items-start justify-between gap-4">
+                  <div className="flex items-start gap-4">
+                    <div className="text-center min-w-[48px]">
+                      <p className="text-lg font-bold text-white">
+                        {new Date(ticket.fecha_visita!).toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit' })}
+                      </p>
+                    </div>
+                    <div className="space-y-1">
+                      <p className="text-sm font-medium text-white">{ticket.titulo}</p>
+                      <p className="text-xs text-zinc-400">{ticket.cliente_nombre}</p>
+                      {ticket.tecnico_nombre && (
+                        <p className="text-xs text-zinc-500">Técnico: {ticket.tecnico_nombre}</p>
+                      )}
+                    </div>
                   </div>
-                  <div className="space-y-1">
-                    <p className="text-sm font-medium text-white">{ticket.titulo}</p>
-                    <p className="text-xs text-zinc-400">{ticket.cliente_nombre}</p>
-                    {ticket.tecnico_nombre && (
-                      <p className="text-xs text-zinc-500">Técnico: {ticket.tecnico_nombre}</p>
-                    )}
+                  <div className="flex flex-col gap-1 items-end">
+                    <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${URGENCIA_BADGE[ticket.urgencia]}`}>
+                      {URGENCIA_LABELS[ticket.urgencia]}
+                    </span>
+                    <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${ESTADO_BADGE[ticket.estado]}`}>
+                      {ESTADO_LABELS[ticket.estado]}
+                    </span>
                   </div>
-                </div>
-                <div className="flex flex-col gap-1 items-end">
-                  <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${URGENCIA_BADGE[ticket.urgencia]}`}>
-                    {URGENCIA_LABELS[ticket.urgencia]}
-                  </span>
-                  <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${ESTADO_BADGE[ticket.estado]}`}>
-                    {ESTADO_LABELS[ticket.estado]}
-                  </span>
                 </div>
               </div>
-            </div>
+            </Link>
           ))}
         </div>
       )}
