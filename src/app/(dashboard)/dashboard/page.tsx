@@ -72,13 +72,13 @@ export default function DashboardPage() {
 
       {/* KPIs */}
       {loading ? (
-        <div className="grid grid-cols-4 gap-4">
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
           {[...Array(4)].map((_, i) => (
             <div key={i} className="bg-zinc-900 border border-zinc-800 rounded-lg p-5 h-24 animate-pulse" />
           ))}
         </div>
       ) : (
-        <div className="grid grid-cols-4 gap-4">
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
           <KPICard
             label="Tickets abiertos"
             value={ticketsAbiertos}
@@ -106,9 +106,9 @@ export default function DashboardPage() {
         </div>
       )}
 
-      <div className="grid grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
         {/* Tickets recientes */}
-        <div className="col-span-2 bg-zinc-900 border border-zinc-800 rounded-lg overflow-hidden">
+        <div className="col-span-1 lg:col-span-2 bg-zinc-900 border border-zinc-800 rounded-lg overflow-hidden">
           <div className="flex items-center justify-between px-5 py-4 border-b border-zinc-800">
             <h2 className="text-sm font-medium text-zinc-200">Tickets recientes</h2>
             <Link href="/tickets">
