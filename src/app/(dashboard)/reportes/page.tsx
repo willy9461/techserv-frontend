@@ -67,7 +67,7 @@ export default function ReportesPage() {
       </div>
 
       {/* KPIs */}
-      <div className="grid grid-cols-4 gap-4">
+      <div className="col-span-1 lg:col-span-2 bg-zinc-900 border border-zinc-800 rounded-lg overflow-hidden">
         <StatCard label="Total tickets" value={total} />
         <StatCard label="Con técnico" value={conTecnico} sub={`${total > 0 ? Math.round(conTecnico / total * 100) : 0}% del total`} />
         <StatCard label="Sin asignar" value={sinTecnico} />
