@@ -60,21 +60,21 @@ export function TicketCard({ ticket, className = '' }: TicketCardProps) {
           </div>
           <EstadoBadge estado={ticket.estado} />
         </div>
-        <div className="flex items-center justify-between text-xs text-zinc-500">
-          <div className="flex items-center gap-3">
-            <span className="truncate max-w-[120px]">{ticket.cliente_nombre}</span>
-            {ticket.tecnico_nombre && (
-              <>
-                <span className="text-zinc-700">·</span>
-                <span className="truncate max-w-[120px]">{ticket.tecnico_nombre}</span>
-              </>
-            )}
-          </div>
-          <div className="flex items-center gap-3 shrink-0">
-            <UrgenciaBadge urgencia={ticket.urgencia} />
-            {fecha && <span>{fecha}</span>}
-          </div>
-        </div>
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 text-xs text-zinc-500">
+  <div className="flex items-center gap-3">
+    <span className="truncate max-w-[160px]">{ticket.cliente_nombre}</span>
+    {ticket.tecnico_nombre && (
+      <>
+        <span className="text-zinc-700">·</span>
+        <span className="truncate max-w-[160px]">{ticket.tecnico_nombre}</span>
+      </>
+    )}
+  </div>
+  <div className="flex items-center gap-3 shrink-0">
+    <UrgenciaBadge urgencia={ticket.urgencia} />
+    {fecha && <span>{fecha}</span>}
+  </div>
+</div>
       </div>
     </Link>
   )
