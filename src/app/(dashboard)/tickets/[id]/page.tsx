@@ -9,8 +9,6 @@ import { getTicketById, updateTicketStatus } from '@/api/tickets'
 import { getTecnicos } from '@/api/users'
 import axiosInstance from '@/lib/axios'
 
-// ─── Modal Cambiar Estado ─────────────────────────────────────────────────────
-
 const TRANSICIONES: Record<TicketEstado, TicketEstado[]> = {
   abierto:        ['en_diagnostico'],
   en_diagnostico: ['en_proceso'],
@@ -48,7 +46,6 @@ function CambiarEstadoModal({ ticket, onClose, onSuccess }: {
     <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50">
       <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-6 w-full max-w-sm space-y-4">
         <h2 className="text-sm font-semibold text-white">Cambiar estado</h2>
-
         {opciones.length === 0 ? (
           <p className="text-sm text-zinc-500">Este ticket no puede cambiar de estado.</p>
         ) : (
@@ -68,7 +65,6 @@ function CambiarEstadoModal({ ticket, onClose, onSuccess }: {
                 </button>
               ))}
             </div>
-
             <div>
               <label className="block text-xs text-zinc-500 mb-1.5">Nota (opcional)</label>
               <textarea
@@ -79,16 +75,11 @@ function CambiarEstadoModal({ ticket, onClose, onSuccess }: {
                 className="w-full bg-zinc-800 border border-zinc-700 rounded-lg px-3 py-2 text-sm text-zinc-200 placeholder-zinc-600 focus:outline-none focus:border-zinc-600 resize-none"
               />
             </div>
-
             {error && <p className="text-xs text-red-400">{error}</p>}
           </>
         )}
-
         <div className="flex justify-end gap-2 pt-1">
-          <button
-            onClick={onClose}
-            className="px-3 py-2 text-sm text-zinc-400 hover:text-zinc-200 transition-colors"
-          >
+          <button onClick={onClose} className="px-3 py-2 text-sm text-zinc-400 hover:text-zinc-200 transition-colors">
             Cancelar
           </button>
           {opciones.length > 0 && (
@@ -105,8 +96,6 @@ function CambiarEstadoModal({ ticket, onClose, onSuccess }: {
     </div>
   )
 }
-
-// ─── Modal Asignar Técnico ────────────────────────────────────────────────────
 
 interface TecnicoListItem {
   id: string
@@ -151,7 +140,6 @@ function AsignarTecnicoModal({ ticketId, onClose, onSuccess }: {
     <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50">
       <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-6 w-full max-w-sm space-y-4">
         <h2 className="text-sm font-semibold text-white">Asignar técnico</h2>
-
         {loading ? (
           <div className="flex justify-center py-4">
             <div className="w-5 h-5 border-2 border-zinc-600 border-t-blue-500 rounded-full animate-spin" />
@@ -178,12 +166,8 @@ function AsignarTecnicoModal({ ticketId, onClose, onSuccess }: {
             ))}
           </div>
         )}
-
         <div className="flex justify-end gap-2 pt-1">
-          <button
-            onClick={onClose}
-            className="px-3 py-2 text-sm text-zinc-400 hover:text-zinc-200 transition-colors"
-          >
+          <button onClick={onClose} className="px-3 py-2 text-sm text-zinc-400 hover:text-zinc-200 transition-colors">
             Cancelar
           </button>
           {!loading && tecnicos.length > 0 && (
@@ -200,8 +184,6 @@ function AsignarTecnicoModal({ ticketId, onClose, onSuccess }: {
     </div>
   )
 }
-
-// ─── Componentes auxiliares ───────────────────────────────────────────────────
 
 function TicketProgress({ estado }: { estado: string }) {
   const currentIdx = ESTADO_ORDER.indexOf(estado as never)
@@ -239,8 +221,6 @@ function Section({ title, children }: { title: string; children: React.ReactNode
   )
 }
 
-// ─── Página principal ─────────────────────────────────────────────────────────
-
 export default function TicketDetailPage() {
   const params = useParams()
   const id = params.id as string
@@ -251,12 +231,18 @@ export default function TicketDetailPage() {
   const [modalEstado, setModalEstado] = useState(false)
   const [modalTecnico, setModalTecnico] = useState(false)
   const [fechaVisita, setFechaVisita] = useState<string | null>(null)
-const [guardandoFecha, setGuardandoFecha] = useState(false)
-const [fechaGuardada, setFechaGuardada] = useState(false)
+  const [guardandoFecha, setGuardandoFecha] = useState(false)
+  const [fechaGuardada, setFechaGuardada] = useState(false)
 
   useEffect(() => {
     getTicketById(id)
-      .then(setTicket)
+      .then((t) => {
+        setTicket(t)
+        if (t.fecha_visita) {
+          setFechaVisita(t.fecha_visita.slice(0, 10))
+          setFechaGuardada(true)
+        }
+      })
       .catch(() => setError('No se pudo cargar el ticket.'))
       .finally(() => setLoading(false))
   }, [id])
@@ -282,7 +268,6 @@ const [fechaGuardada, setFechaGuardada] = useState(false)
 
   return (
     <div className="space-y-6 max-w-5xl">
-      {/* Modales */}
       {modalEstado && (
         <CambiarEstadoModal
           ticket={ticket}
@@ -307,14 +292,12 @@ const [fechaGuardada, setFechaGuardada] = useState(false)
         />
       )}
 
-      {/* Breadcrumb */}
       <div className="flex items-center gap-2 text-sm text-zinc-500">
         <Link href="/tickets" className="hover:text-zinc-300 transition-colors">Tickets</Link>
         <span>›</span>
         <span className="text-zinc-300 font-mono">#{ticket.id.slice(0, 8).toUpperCase()}</span>
       </div>
 
-      {/* Título + acciones */}
       <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
         <div>
           <h1 className="text-xl font-semibold text-white">{ticket.titulo}</h1>
@@ -344,7 +327,6 @@ const [fechaGuardada, setFechaGuardada] = useState(false)
         </div>
       </div>
 
-      {/* Progreso */}
       <Section title="Progreso">
         <TicketProgress estado={ticket.estado} />
       </Section>
@@ -405,35 +387,40 @@ const [fechaGuardada, setFechaGuardada] = useState(false)
           </Section>
 
           <Section title="Fecha de visita">
-  <div className="space-y-2">
-    {fechaGuardada && fechaVisita && (
-      <p className="text-sm text-zinc-200">
-        {// DESPUÉS
-new Date(fechaVisita + 'T12:00:00').toLocaleDateString('es-AR', {
-  weekday: 'long', day: '2-digit', month: 'long', year: 'numeric',
-})}
-      </p>
-    )}
-    <input
-      type="date"
-      value={fechaVisita ?? ''}
-      onChange={(e) => { setFechaVisita(e.target.value); setFechaGuardada(false) }}
-      className="w-full bg-zinc-800 border border-zinc-700 rounded-lg px-3 py-2 text-sm text-zinc-200 focus:outline-none focus:border-zinc-600"
-    />
-    <button
-      onClick={() => {
-        if (!fechaVisita) return
-        setGuardandoFecha(true)
-        // TODO: await api.patch(`/tickets/${ticket.id}`, { fecha_visita: fechaVisita })
-        setTimeout(() => { setGuardandoFecha(false); setFechaGuardada(true) }, 500)
-      }}
-      disabled={!fechaVisita || guardandoFecha}
-      className="w-full px-3 py-2 bg-blue-500 hover:bg-blue-400 disabled:bg-zinc-700 disabled:text-zinc-500 text-white text-sm font-medium rounded-lg transition-colors"
-    >
-      {guardandoFecha ? 'Guardando...' : 'Guardar fecha'}
-    </button>
-  </div>
-</Section>
+            <div className="space-y-2">
+              {fechaGuardada && fechaVisita && (
+                <p className="text-sm text-zinc-200">
+                  {new Date(fechaVisita + 'T12:00:00').toLocaleDateString('es-AR', {
+                    weekday: 'long', day: '2-digit', month: 'long', year: 'numeric',
+                  })}
+                </p>
+              )}
+              <input
+                type="date"
+                value={fechaVisita ?? ''}
+                onChange={(e) => { setFechaVisita(e.target.value); setFechaGuardada(false) }}
+                className="w-full bg-zinc-800 border border-zinc-700 rounded-lg px-3 py-2 text-sm text-zinc-200 focus:outline-none focus:border-zinc-600"
+              />
+              <button
+                onClick={async () => {
+                  if (!fechaVisita) return
+                  setGuardandoFecha(true)
+                  try {
+                    await axiosInstance.patch(`/tickets/${ticket.id}`, { fecha_visita: fechaVisita + 'T12:00:00' })
+                    setFechaGuardada(true)
+                  } catch {
+                    // podés agregar un mensaje de error acá si querés
+                  } finally {
+                    setGuardandoFecha(false)
+                  }
+                }}
+                disabled={!fechaVisita || guardandoFecha}
+                className="w-full px-3 py-2 bg-blue-500 hover:bg-blue-400 disabled:bg-zinc-700 disabled:text-zinc-500 text-white text-sm font-medium rounded-lg transition-colors"
+              >
+                {guardandoFecha ? 'Guardando...' : 'Guardar fecha'}
+              </button>
+            </div>
+          </Section>
 
           <Section title="Dirección">
             <p className="text-sm text-zinc-300">{ticket.direccion}</p>
