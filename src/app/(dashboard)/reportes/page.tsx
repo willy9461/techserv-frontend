@@ -42,8 +42,8 @@ export default function ReportesPage() {
     color: ESTADO_COLORS[e],
   }))
 
-  const conTecnico = tickets.filter(t => t.tecnico_nombre).length
-  const sinTecnico = tickets.filter(t => !t.tecnico_nombre).length
+  const conTecnico = tickets.filter(t => t.tecnico?.full_name).length
+  const sinTecnico = tickets.filter(t => !t.tecnico?.full_name).length
 
   const porUrgencia = {
     alta:  tickets.filter(t => t.urgencia === 'alta').length,

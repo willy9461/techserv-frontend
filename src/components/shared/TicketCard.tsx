@@ -62,11 +62,11 @@ export function TicketCard({ ticket, className = '' }: TicketCardProps) {
         </div>
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 text-xs text-zinc-500">
   <div className="flex items-center gap-3">
-    <span className="truncate max-w-[160px]">{ticket.cliente_nombre}</span>
-    {ticket.tecnico_nombre && (
+    <span className="truncate max-w-[160px]">{ticket.cliente?.full_name}</span>
+    {ticket.tecnico?.full_name && (
       <>
         <span className="text-zinc-700">·</span>
-        <span className="truncate max-w-[160px]">{ticket.tecnico_nombre}</span>
+        <span className="truncate max-w-[160px]">{ticket.tecnico.full_name}</span>
       </>
     )}
   </div>
@@ -96,8 +96,8 @@ export function TicketRow({ ticket }: TicketRowProps) {
       <tr className="border-b border-zinc-800 hover:bg-zinc-800/40 transition-colors cursor-pointer">
         <td className="py-3 px-4"><span className="font-mono text-xs text-zinc-400">#{ticket.id.slice(0, 8).toUpperCase()}</span></td>
         <td className="py-3 px-4"><span className="text-sm text-zinc-200">{ticket.titulo}</span></td>
-        <td className="py-3 px-4"><span className="text-sm text-zinc-400">{ticket.cliente_nombre}</span></td>
-        <td className="py-3 px-4"><span className="text-sm text-zinc-500">{ticket.tecnico_nombre ?? '—'}</span></td>
+        <td className="py-3 px-4"><span className="text-sm text-zinc-400">{ticket.cliente?.full_name}</span></td>
+        <td className="py-3 px-4"><span className="text-sm text-zinc-500">{ticket.tecnico?.full_name ?? '—'}</span></td>
         <td className="py-3 px-4"><EstadoBadge estado={ticket.estado} /></td>
         <td className="py-3 px-4"><UrgenciaBadge urgencia={ticket.urgencia} /></td>
         <td className="py-3 px-4"><span className="text-xs text-zinc-500">{fecha}</span></td>

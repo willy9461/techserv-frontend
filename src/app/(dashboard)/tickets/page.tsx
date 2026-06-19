@@ -37,7 +37,7 @@ const [estadoFiltro, setEstadoFiltro] = useState<TicketEstado | 'todos'>('todos'
       const matchSearch =
         search === '' ||
         t.titulo.toLowerCase().includes(search.toLowerCase()) ||
-        t.cliente_nombre.toLowerCase().includes(search.toLowerCase()) ||
+        (t.cliente?.full_name ?? '').toLowerCase().includes(search.toLowerCase()) ||
         t.id.includes(search.toLowerCase())
 const matchEstado = estadoFiltro === 'todos' ? t.estado !== 'resuelto' : t.estado === estadoFiltro
       const matchUrgencia = urgenciaFiltro === 'todos' || t.urgencia === urgenciaFiltro

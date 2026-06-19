@@ -67,7 +67,7 @@ export default function DashboardPage() {
   const ticketsResueltos = tickets.filter(
     (t) => t.estado === "resuelto",
   ).length;
-  const sinAsignar = tickets.filter((t) => !t.tecnico_nombre).length;
+  const sinAsignar = tickets.filter((t) => !t.tecnico?.full_name).length;
   const recientes = tickets.slice(0, 5);
   const tecnicosActivos = tecnicos.filter((t) => t.is_active);
 
@@ -156,13 +156,13 @@ export default function DashboardPage() {
                         {t.titulo}
                       </p>
                       <p className="text-xs text-zinc-500 mt-0.5">
-                        {t.cliente_nombre}
+                        {t.cliente?.full_name}
                       </p>
                     </div>
                     <div className="flex items-center gap-3 shrink-0">
-                      {t.tecnico_nombre ? (
+                      {t.tecnico?.full_name ? (
                         <span className="text-xs text-zinc-500">
-                          {t.tecnico_nombre}
+                          {t.tecnico.full_name}
                         </span>
                       ) : (
                         <span className="text-xs text-amber-500 font-medium">

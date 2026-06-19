@@ -62,9 +62,9 @@ export interface TicketListItem {
   urgencia: TicketUrgencia
   fecha_creacion: string | null
   fecha_visita?: string | null
-  cliente_nombre: string
-  tecnico_nombre?: string
-  equipo_tipo: TipoEquipo
+  cliente: { id: string; full_name: string } | null
+  tecnico: { id: string; full_name: string } | null
+  equipo: { id: string; tipo: string; marca: string; modelo: string; numero_serie: string } | null
 }
 
 export interface CreateTicketPayload {

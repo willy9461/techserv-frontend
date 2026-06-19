@@ -83,9 +83,9 @@ export default function MisTicketsPage() {
 
               <div className="flex items-center justify-between text-xs text-zinc-500">
                 <div className="flex gap-4">
-                  <span>{ticket.equipo_tipo}</span>
-                  {ticket.tecnico_nombre ? (
-                    <span>Técnico: <span className="text-zinc-300">{ticket.tecnico_nombre}</span></span>
+                  <span>{ticket.equipo?.tipo}</span>
+                  {ticket.tecnico?.full_name ? (
+                    <span>Técnico: <span className="text-zinc-300">{ticket.tecnico.full_name}</span></span>
                   ) : (
                     <span className="text-amber-500">Sin asignar</span>
                   )}

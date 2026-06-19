@@ -152,9 +152,9 @@ export default function AgendaPage() {
                     </div>
                     <div className="space-y-1">
                       <p className="text-sm font-medium text-white">{ticket.titulo}</p>
-                      <p className="text-xs text-zinc-400">{ticket.cliente_nombre}</p>
-                      {ticket.tecnico_nombre && (
-                        <p className="text-xs text-zinc-500">Técnico: {ticket.tecnico_nombre}</p>
+                      <p className="text-xs text-zinc-400">{ticket.cliente?.full_name}</p>
+                      {ticket.tecnico?.full_name && (
+                        <p className="text-xs text-zinc-500">Técnico: {ticket.tecnico.full_name}</p>
                       )}
                     </div>
                   </div>
