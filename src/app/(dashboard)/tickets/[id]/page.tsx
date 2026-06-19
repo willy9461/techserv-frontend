@@ -228,6 +228,7 @@ export default function TicketDetailPage() {
 
   const { user } = useAuthStore()
   const esCliente = user?.role === 'cliente'
+  const esTecnico = user?.role === 'tecnico'
 
   const [ticket, setTicket] = useState<Ticket | null>(null)
   const [loading, setLoading] = useState(true)
@@ -282,7 +283,7 @@ export default function TicketDetailPage() {
           }}
         />
       )}
-      {!esCliente && modalTecnico && (
+      {!esCliente && !esTecnico && modalTecnico && (
         <AsignarTecnicoModal
           ticketId={ticket.id}
           onClose={() => setModalTecnico(false)}
@@ -317,12 +318,14 @@ export default function TicketDetailPage() {
         </div>
         {!esCliente && (
           <div className="flex gap-2 sm:shrink-0">
-            <button
-              onClick={() => setModalTecnico(true)}
-              className="px-3 py-2 bg-zinc-800 hover:bg-zinc-700 border border-zinc-700 text-zinc-300 text-sm rounded-lg transition-colors"
-            >
-              Asignar técnico
-            </button>
+            {!esTecnico && (
+              <button
+                onClick={() => setModalTecnico(true)}
+                className="px-3 py-2 bg-zinc-800 hover:bg-zinc-700 border border-zinc-700 text-zinc-300 text-sm rounded-lg transition-colors"
+              >
+                Asignar técnico
+              </button>
+            )}
             <button
               onClick={() => setModalEstado(true)}
               className="px-3 py-2 bg-blue-500 hover:bg-blue-400 text-white text-sm font-medium rounded-lg transition-colors"
