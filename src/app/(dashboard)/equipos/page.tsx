@@ -64,16 +64,7 @@ export default function MisEquiposPage() {
                 </div>
               </div>
 
-              <div className="border-t border-zinc-800 pt-3">
-                <p className="text-xs text-zinc-600">Sin intervenciones registradas.</p>
-              </div>
-
-              <Link
-                href="/tickets/nuevo"
-                className="text-xs text-blue-400 hover:text-blue-300 transition-colors"
-              >
-                + Solicitar asistencia para este equipo
-              </Link>
+             
             </div>
           ))}
         </div>
