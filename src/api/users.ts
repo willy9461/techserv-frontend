@@ -72,3 +72,16 @@ export async function updateUsuario(id: string, payload: Partial<Pick<User, 'rol
   const { data } = await axiosInstance.patch<User>(`/users/${id}`, payload)
   return data
 }
+
+export interface CrearUsuarioPayload {
+  email: string
+  full_name: string
+  phone: string
+  password: string
+  role: 'administrador' | 'supervisor' | 'area_administrativa'
+}
+
+export async function crearUsuario(payload: CrearUsuarioPayload): Promise<User> {
+  const { data } = await axiosInstance.post<User>('/users', payload)
+  return data
+}
