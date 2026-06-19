@@ -105,7 +105,7 @@ const matchEstado = estadoFiltro === 'todos' ? t.estado !== 'resuelto' : t.estad
               : 'bg-zinc-900 text-zinc-400 hover:bg-zinc-800 border border-zinc-800'
           }`}
         >
-          Todos · {tickets.length}
+          Activos · {tickets.filter(t => t.estado !== 'resuelto').length}
         </button>
         {ESTADOS.map((e) => {
           const count = countByEstado[e] ?? 0
