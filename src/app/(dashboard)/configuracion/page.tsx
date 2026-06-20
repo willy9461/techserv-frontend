@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import { User } from '@/types/user'
-import { getUsuarios, updateUsuario } from '@/api/users'
+import { getUsuarios, updateUsuario, crearUsuario, CrearUsuarioPayload } from '@/api/users'
 
 const ROL_LABELS: Record<string, string> = {
   cliente: 'Cliente',
@@ -12,7 +12,136 @@ const ROL_LABELS: Record<string, string> = {
   area_administrativa: 'Área Administrativa',
 }
 
+// Solo estos 3 roles se pueden crear desde este panel
+const ROLES_CREABLES: CrearUsuarioPayload['role'][] = ['administrador', 'supervisor', 'area_administrativa']
 
+function CrearUsuarioForm({ onCreated }: { onCreated: (user: User) => void }) {
+  const [open, setOpen] = useState(false)
+  const [fullName, setFullName] = useState('')
+  const [email, setEmail] = useState('')
+  const [phone, setPhone] = useState('')
+  const [password, setPassword] = useState('')
+  const [role, setRole] = useState<CrearUsuarioPayload['role']>('supervisor')
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+
+  const resetForm = () => {
+    setFullName('')
+    setEmail('')
+    setPhone('')
+    setPassword('')
+    setRole('supervisor')
+    setError(null)
+  }
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    setLoading(true)
+    setError(null)
+    try {
+      const nuevo = await crearUsuario({ full_name: fullName, email, phone, password, role })
+      onCreated(nuevo)
+      resetForm()
+      setOpen(false)
+    } catch {
+      setError('No se pudo crear el usuario. Verificá los datos e intentá de nuevo.')
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  if (!open) {
+    return (
+      <div className="px-5 py-4 border-b border-zinc-800">
+        <button
+          onClick={() => setOpen(true)}
+          className="px-3 py-2 bg-blue-500 hover:bg-blue-400 text-white text-sm font-medium rounded-lg transition-colors"
+        >
+          + Crear usuario
+        </button>
+      </div>
+    )
+  }
+
+  return (
+    <form onSubmit={handleSubmit} className="px-5 py-4 border-b border-zinc-800 space-y-3 bg-zinc-900/60">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+        <div>
+          <label className="block text-xs font-medium text-zinc-500 mb-1.5">Nombre completo</label>
+          <input
+            type="text"
+            value={fullName}
+            onChange={e => setFullName(e.target.value)}
+            required
+            className="w-full bg-zinc-800 border border-zinc-700 rounded-lg px-3 py-2 text-sm text-zinc-200 focus:outline-none focus:border-zinc-500"
+          />
+        </div>
+        <div>
+          <label className="block text-xs font-medium text-zinc-500 mb-1.5">Email</label>
+          <input
+            type="email"
+            value={email}
+            onChange={e => setEmail(e.target.value)}
+            required
+            className="w-full bg-zinc-800 border border-zinc-700 rounded-lg px-3 py-2 text-sm text-zinc-200 focus:outline-none focus:border-zinc-500"
+          />
+        </div>
+        <div>
+          <label className="block text-xs font-medium text-zinc-500 mb-1.5">Teléfono</label>
+          <input
+            type="text"
+            value={phone}
+            onChange={e => setPhone(e.target.value)}
+            required
+            className="w-full bg-zinc-800 border border-zinc-700 rounded-lg px-3 py-2 text-sm text-zinc-200 focus:outline-none focus:border-zinc-500"
+          />
+        </div>
+        <div>
+          <label className="block text-xs font-medium text-zinc-500 mb-1.5">Contraseña</label>
+          <input
+            type="password"
+            value={password}
+            onChange={e => setPassword(e.target.value)}
+            required
+            minLength={6}
+            className="w-full bg-zinc-800 border border-zinc-700 rounded-lg px-3 py-2 text-sm text-zinc-200 focus:outline-none focus:border-zinc-500"
+          />
+        </div>
+        <div className="col-span-1 sm:col-span-2">
+          <label className="block text-xs font-medium text-zinc-500 mb-1.5">Rol</label>
+          <select
+            value={role}
+            onChange={e => setRole(e.target.value as CrearUsuarioPayload['role'])}
+            className="w-full bg-zinc-800 border border-zinc-700 rounded-lg px-3 py-2 text-sm text-zinc-200 focus:outline-none focus:border-zinc-500"
+          >
+            {ROLES_CREABLES.map(r => (
+              <option key={r} value={r}>{ROL_LABELS[r]}</option>
+            ))}
+          </select>
+        </div>
+      </div>
+
+      {error && <p className="text-xs text-red-400">{error}</p>}
+
+      <div className="flex gap-2 pt-1">
+        <button
+          type="submit"
+          disabled={loading}
+          className="px-4 py-2 bg-blue-500 hover:bg-blue-400 disabled:bg-zinc-700 disabled:text-zinc-500 text-white text-sm font-medium rounded-lg transition-colors"
+        >
+          {loading ? 'Creando...' : 'Crear usuario'}
+        </button>
+        <button
+          type="button"
+          onClick={() => { setOpen(false); resetForm() }}
+          className="px-3 py-2 text-sm text-zinc-400 hover:text-zinc-200 transition-colors"
+        >
+          Cancelar
+        </button>
+      </div>
+    </form>
+  )
+}
 
 export default function ConfiguracionPage() {
   const [usuarios, setUsuarios] = useState<User[]>([])
@@ -66,6 +195,8 @@ export default function ConfiguracionPage() {
             {loading ? '...' : `${usuarios.length} usuarios registrados`}
           </p>
         </div>
+
+        <CrearUsuarioForm onCreated={(nuevo) => setUsuarios(prev => [nuevo, ...prev])} />
 
         {loading ? (
           <div className="flex justify-center py-12">
