@@ -3,6 +3,7 @@ import { User } from '@/types/user'
 
 interface LoginResponse {
   access_token: string
+  refresh_token: string
   token_type: string
 }
 
@@ -28,6 +29,7 @@ interface RegisterData {
 
 interface RegisterResponse {
   access_token: string
+  refresh_token: string
   token_type: string
 }
 

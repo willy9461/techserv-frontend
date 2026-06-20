@@ -22,9 +22,9 @@ export default function RegisterPage() {
     setIsLoading(true)
 
     try {
-      const { access_token } = await register({ email, password, full_name: fullName, role, phone })
+      const { access_token, refresh_token } = await register({ email, password, full_name: fullName, role, phone })
       const me = await getMe(access_token)
-      setAuth(me, access_token)
+      setAuth(me, access_token, refresh_token)
 
       const roleRedirects: Record<string, string> = {
         cliente: '/tickets',
