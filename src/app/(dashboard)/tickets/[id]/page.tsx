@@ -1,11 +1,11 @@
 'use client'
 
-import { useParams } from 'next/navigation'
+import { useParams, useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { EstadoBadge, UrgenciaBadge } from '@/components/shared/TicketCard'
 import { Ticket, ESTADO_ORDER, ESTADO_LABELS, TicketEstado } from '@/types/ticket'
-import { getTicketById, updateTicketStatus } from '@/api/tickets'
+import { getTicketById, updateTicketStatus, eliminarTicket } from '@/api/tickets'
 import { getTecnicos } from '@/api/users'
 import axiosInstance from '@/lib/axios'
 import useAuthStore from '@/store/authStore'
@@ -186,6 +186,41 @@ function AsignarTecnicoModal({ ticketId, onClose, onSuccess }: {
   )
 }
 
+function EliminarTicketModal({ onClose, onConfirm, eliminando, error }: {
+  onClose: () => void
+  onConfirm: () => void
+  eliminando: boolean
+  error: string | null
+}) {
+  return (
+    <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50">
+      <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-6 w-full max-w-sm space-y-4">
+        <h2 className="text-sm font-semibold text-white">Eliminar ticket</h2>
+        <p className="text-sm text-zinc-400">
+          ¿Seguro que querés eliminar este ticket? Esta acción no se puede deshacer.
+        </p>
+        {error && <p className="text-xs text-red-400">{error}</p>}
+        <div className="flex justify-end gap-2 pt-1">
+          <button
+            onClick={onClose}
+            disabled={eliminando}
+            className="px-3 py-2 text-sm text-zinc-400 hover:text-zinc-200 disabled:opacity-50 transition-colors"
+          >
+            Cancelar
+          </button>
+          <button
+            onClick={onConfirm}
+            disabled={eliminando}
+            className="px-4 py-2 bg-red-600 hover:bg-red-500 disabled:bg-zinc-700 disabled:text-zinc-500 text-white text-sm font-medium rounded-lg transition-colors"
+          >
+            {eliminando ? 'Eliminando...' : 'Eliminar'}
+          </button>
+        </div>
+      </div>
+    </div>
+  )
+}
+
 function TicketProgress({ estado }: { estado: string }) {
   const currentIdx = ESTADO_ORDER.indexOf(estado as never)
   return (
@@ -224,6 +259,7 @@ function Section({ title, children }: { title: string; children: React.ReactNode
 
 export default function TicketDetailPage() {
   const params = useParams()
+  const router = useRouter()
   const id = params.id as string
 
   const { user } = useAuthStore()
@@ -238,6 +274,9 @@ export default function TicketDetailPage() {
   const [fechaVisita, setFechaVisita] = useState<string | null>(null)
   const [guardandoFecha, setGuardandoFecha] = useState(false)
   const [fechaGuardada, setFechaGuardada] = useState(false)
+  const [modalEliminar, setModalEliminar] = useState(false)
+  const [eliminando, setEliminando] = useState(false)
+  const [errorEliminar, setErrorEliminar] = useState<string | null>(null)
 
   useEffect(() => {
     getTicketById(id)
@@ -271,6 +310,18 @@ export default function TicketDetailPage() {
     )
   }
 
+  const handleEliminar = async () => {
+    setEliminando(true)
+    setErrorEliminar(null)
+    try {
+      await eliminarTicket(ticket.id)
+      router.push('/tickets')
+    } catch {
+      setErrorEliminar('No se pudo eliminar el ticket. Intentá de nuevo.')
+      setEliminando(false)
+    }
+  }
+
   return (
     <div className="space-y-6 max-w-5xl">
       {!esCliente && modalEstado && (
@@ -296,6 +347,14 @@ export default function TicketDetailPage() {
           }}
         />
       )}
+      {!esCliente && !esTecnico && modalEliminar && (
+        <EliminarTicketModal
+          onClose={() => setModalEliminar(false)}
+          onConfirm={handleEliminar}
+          eliminando={eliminando}
+          error={errorEliminar}
+        />
+      )}
 
       <div className="flex items-center gap-2 text-sm text-zinc-500">
         <Link href="/tickets" className="hover:text-zinc-300 transition-colors">Tickets</Link>
@@ -318,6 +377,14 @@ export default function TicketDetailPage() {
         </div>
         {!esCliente && (
           <div className="flex gap-2 sm:shrink-0">
+            {!esTecnico && ticket.estado === 'abierto' && (
+              <button
+                onClick={() => setModalEliminar(true)}
+                className="px-3 py-2 bg-red-500/10 hover:bg-red-500/20 border border-red-500/30 text-red-400 text-sm rounded-lg transition-colors"
+              >
+                Eliminar
+              </button>
+            )}
             {!esTecnico && (
               <button
                 onClick={() => setModalTecnico(true)}

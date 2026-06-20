@@ -38,3 +38,9 @@ export async function getMisTickets(): Promise<MiTicket[]> {
   const { data } = await api.get<MiTicket[]>('/tickets/mis-tickets')
   return data
 }
+
+// ─── Eliminar ticket (soft delete, solo si está en estado abierto) ───────────
+
+export async function eliminarTicket(id: string): Promise<void> {
+  await api.delete(`/tickets/${id}`)
+}
