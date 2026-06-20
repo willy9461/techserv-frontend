@@ -18,9 +18,9 @@ export default function LoginPage() {
     setError("");
     setIsLoading(true);
     try {
-      const { access_token } = await login(user, password);
+      const { access_token, refresh_token } = await login(user, password);
       const me = await getMe(access_token);
-      setAuth(me, access_token);
+      setAuth(me, access_token, refresh_token);
 
       const roleRedirects: Record<string, string> = {
         cliente: "/tickets",

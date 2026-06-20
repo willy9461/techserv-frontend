@@ -5,8 +5,10 @@ import { User } from '@/types/user'
 interface AuthState {
   user: User | null
   token: string | null
+  refreshToken: string | null
   isLoading: boolean
-  setAuth: (user: User, token: string) => void
+  setAuth: (user: User, token: string, refreshToken: string) => void
+  setTokens: (token: string, refreshToken: string) => void
   setIsLoading: (isLoading: boolean) => void
   clearAuth: () => void
 }
@@ -16,15 +18,19 @@ const useAuthStore = create<AuthState>()(
     (set) => ({
       user: null,
       token: null,
+      refreshToken: null,
       isLoading: false,
-      setAuth: (user, token) => {
+      setAuth: (user, token, refreshToken) => {
         document.cookie = `techserv-role=${user.role}; path=/; max-age=86400; SameSite=Lax`
-        set({ user, token })
+        set({ user, token, refreshToken })
+      },
+      setTokens: (token, refreshToken) => {
+        set({ token, refreshToken })
       },
       setIsLoading: (isLoading) => set({ isLoading }),
       clearAuth: () => {
         document.cookie = 'techserv-role=; path=/; max-age=0'
-        set({ user: null, token: null })
+        set({ user: null, token: null, refreshToken: null })
       },
     }),
     {
