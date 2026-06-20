@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import { User } from '@/types/user'
-import { getUsuarios, updateUsuario, crearUsuario, CrearUsuarioPayload } from '@/api/users'
+import { getUsuarios, updateUsuario } from '@/api/users'
 
 const ROL_LABELS: Record<string, string> = {
   cliente: 'Cliente',
@@ -12,144 +12,7 @@ const ROL_LABELS: Record<string, string> = {
   area_administrativa: 'Área Administrativa',
 }
 
-const ROL_COLORS: Record<string, string> = {
-  cliente: 'bg-blue-500/10 text-blue-400',
-  tecnico: 'bg-violet-500/10 text-violet-400',
-  supervisor: 'bg-amber-500/10 text-amber-400',
-  administrador: 'bg-red-500/10 text-red-400',
-  area_administrativa: 'bg-emerald-500/10 text-emerald-400',
-}
 
-// Solo estos 3 roles se pueden crear desde este panel
-const ROLES_CREABLES: CrearUsuarioPayload['role'][] = ['administrador', 'supervisor', 'area_administrativa']
-
-function CrearUsuarioForm({ onCreated }: { onCreated: (user: User) => void }) {
-  const [open, setOpen] = useState(false)
-  const [fullName, setFullName] = useState('')
-  const [email, setEmail] = useState('')
-  const [phone, setPhone] = useState('')
-  const [password, setPassword] = useState('')
-  const [role, setRole] = useState<CrearUsuarioPayload['role']>('supervisor')
-  const [loading, setLoading] = useState(false)
-  const [error, setError] = useState<string | null>(null)
-
-  const resetForm = () => {
-    setFullName('')
-    setEmail('')
-    setPhone('')
-    setPassword('')
-    setRole('supervisor')
-    setError(null)
-  }
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setLoading(true)
-    setError(null)
-    try {
-      const nuevo = await crearUsuario({ full_name: fullName, email, phone, password, role })
-      onCreated(nuevo)
-      resetForm()
-      setOpen(false)
-    } catch {
-      setError('No se pudo crear el usuario. Verificá los datos e intentá de nuevo.')
-    } finally {
-      setLoading(false)
-    }
-  }
-
-  if (!open) {
-    return (
-      <div className="px-5 py-4 border-b border-zinc-800">
-        <button
-          onClick={() => setOpen(true)}
-          className="px-3 py-2 bg-blue-500 hover:bg-blue-400 text-white text-sm font-medium rounded-lg transition-colors"
-        >
-          + Crear usuario
-        </button>
-      </div>
-    )
-  }
-
-  return (
-    <form onSubmit={handleSubmit} className="px-5 py-4 border-b border-zinc-800 space-y-3 bg-zinc-900/60">
-      <div className="grid grid-cols-2 gap-3">
-        <div>
-          <label className="block text-xs font-medium text-zinc-500 mb-1.5">Nombre completo</label>
-          <input
-            type="text"
-            value={fullName}
-            onChange={e => setFullName(e.target.value)}
-            required
-            className="w-full bg-zinc-800 border border-zinc-700 rounded-lg px-3 py-2 text-sm text-zinc-200 focus:outline-none focus:border-zinc-500"
-          />
-        </div>
-        <div>
-          <label className="block text-xs font-medium text-zinc-500 mb-1.5">Email</label>
-          <input
-            type="email"
-            value={email}
-            onChange={e => setEmail(e.target.value)}
-            required
-            className="w-full bg-zinc-800 border border-zinc-700 rounded-lg px-3 py-2 text-sm text-zinc-200 focus:outline-none focus:border-zinc-500"
-          />
-        </div>
-        <div>
-          <label className="block text-xs font-medium text-zinc-500 mb-1.5">Teléfono</label>
-          <input
-            type="text"
-            value={phone}
-            onChange={e => setPhone(e.target.value)}
-            required
-            className="w-full bg-zinc-800 border border-zinc-700 rounded-lg px-3 py-2 text-sm text-zinc-200 focus:outline-none focus:border-zinc-500"
-          />
-        </div>
-        <div>
-          <label className="block text-xs font-medium text-zinc-500 mb-1.5">Contraseña</label>
-          <input
-            type="password"
-            value={password}
-            onChange={e => setPassword(e.target.value)}
-            required
-            minLength={6}
-            className="w-full bg-zinc-800 border border-zinc-700 rounded-lg px-3 py-2 text-sm text-zinc-200 focus:outline-none focus:border-zinc-500"
-          />
-        </div>
-        <div className="col-span-2">
-          <label className="block text-xs font-medium text-zinc-500 mb-1.5">Rol</label>
-          <select
-            value={role}
-            onChange={e => setRole(e.target.value as CrearUsuarioPayload['role'])}
-            className="w-full bg-zinc-800 border border-zinc-700 rounded-lg px-3 py-2 text-sm text-zinc-200 focus:outline-none focus:border-zinc-500"
-          >
-            {ROLES_CREABLES.map(r => (
-              <option key={r} value={r}>{ROL_LABELS[r]}</option>
-            ))}
-          </select>
-        </div>
-      </div>
-
-      {error && <p className="text-xs text-red-400">{error}</p>}
-
-      <div className="flex gap-2 pt-1">
-        <button
-          type="submit"
-          disabled={loading}
-          className="px-4 py-2 bg-blue-500 hover:bg-blue-400 disabled:bg-zinc-700 disabled:text-zinc-500 text-white text-sm font-medium rounded-lg transition-colors"
-        >
-          {loading ? 'Creando...' : 'Crear usuario'}
-        </button>
-        <button
-          type="button"
-          onClick={() => { setOpen(false); resetForm() }}
-          className="px-3 py-2 text-sm text-zinc-400 hover:text-zinc-200 transition-colors"
-        >
-          Cancelar
-        </button>
-      </div>
-    </form>
-  )
-}
 
 export default function ConfiguracionPage() {
   const [usuarios, setUsuarios] = useState<User[]>([])
@@ -204,8 +67,6 @@ export default function ConfiguracionPage() {
           </p>
         </div>
 
-        <CrearUsuarioForm onCreated={(nuevo) => setUsuarios(prev => [nuevo, ...prev])} />
-
         {loading ? (
           <div className="flex justify-center py-12">
             <div className="w-6 h-6 border-2 border-zinc-600 border-t-blue-500 rounded-full animate-spin" />
@@ -213,52 +74,89 @@ export default function ConfiguracionPage() {
         ) : error ? (
           <div className="px-5 py-8 text-center text-sm text-zinc-500">{error}</div>
         ) : (
-          <table className="w-full">
-            <thead>
-              <tr className="border-b border-zinc-800">
-                <th className="text-left px-5 py-3 text-xs font-medium text-zinc-500 uppercase tracking-wider">Usuario</th>
-                <th className="text-left px-5 py-3 text-xs font-medium text-zinc-500 uppercase tracking-wider">Rol</th>
-                <th className="text-left px-5 py-3 text-xs font-medium text-zinc-500 uppercase tracking-wider">Estado</th>
-                <th className="text-left px-5 py-3 text-xs font-medium text-zinc-500 uppercase tracking-wider">Acciones</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-zinc-800">
+          <>
+            {/* Tabla — solo desktop */}
+            <table className="w-full hidden sm:table">
+              <thead>
+                <tr className="border-b border-zinc-800">
+                  <th className="text-left px-5 py-3 text-xs font-medium text-zinc-500 uppercase tracking-wider">Usuario</th>
+                  <th className="text-left px-5 py-3 text-xs font-medium text-zinc-500 uppercase tracking-wider">Rol</th>
+                  <th className="text-left px-5 py-3 text-xs font-medium text-zinc-500 uppercase tracking-wider">Estado</th>
+                  <th className="text-left px-5 py-3 text-xs font-medium text-zinc-500 uppercase tracking-wider">Acciones</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-zinc-800">
+                {usuarios.map(u => (
+                  <tr key={u.id} className="hover:bg-zinc-800/40 transition-colors">
+                    <td className="px-5 py-3.5">
+                      <p className="text-sm text-zinc-200">{u.full_name}</p>
+                      <p className="text-xs text-zinc-500">{u.email}</p>
+                    </td>
+                    <td className="px-5 py-3.5">
+                      <select
+                        value={u.role}
+                        disabled={updating === u.id}
+                        onChange={e => cambiarRol(u, e.target.value)}
+                        className="bg-zinc-800 border border-zinc-700 rounded-lg px-2 py-1 text-xs text-zinc-200 focus:outline-none focus:border-zinc-500 disabled:opacity-50"
+                      >
+                        {Object.entries(ROL_LABELS).map(([value, label]) => (
+                          <option key={value} value={value}>{label}</option>
+                        ))}
+                      </select>
+                    </td>
+                    <td className="px-5 py-3.5">
+                      <span className={`text-xs px-2 py-1 rounded-full font-medium ${u.is_active ? 'bg-emerald-500/10 text-emerald-400' : 'bg-zinc-800 text-zinc-500'}`}>
+                        {u.is_active ? 'Activo' : 'Inactivo'}
+                      </span>
+                    </td>
+                    <td className="px-5 py-3.5">
+                      <button
+                        onClick={() => toggleActivo(u)}
+                        disabled={updating === u.id}
+                        className="text-xs text-zinc-400 hover:text-zinc-200 disabled:opacity-50 transition-colors"
+                      >
+                        {updating === u.id ? 'Guardando...' : u.is_active ? 'Desactivar' : 'Activar'}
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+
+            {/* Cards — solo mobile */}
+            <div className="sm:hidden divide-y divide-zinc-800">
               {usuarios.map(u => (
-                <tr key={u.id} className="hover:bg-zinc-800/40 transition-colors">
-                  <td className="px-5 py-3.5">
+                <div key={u.id} className="px-5 py-4 space-y-3">
+                  <div>
                     <p className="text-sm text-zinc-200">{u.full_name}</p>
                     <p className="text-xs text-zinc-500">{u.email}</p>
-                  </td>
-                  <td className="px-5 py-3.5">
+                  </div>
+                  <div className="flex items-center justify-between gap-2">
                     <select
                       value={u.role}
                       disabled={updating === u.id}
                       onChange={e => cambiarRol(u, e.target.value)}
-                      className="bg-zinc-800 border border-zinc-700 rounded-lg px-2 py-1 text-xs text-zinc-200 focus:outline-none focus:border-zinc-500 disabled:opacity-50"
+                      className="bg-zinc-800 border border-zinc-700 rounded-lg px-2 py-1 text-xs text-zinc-200 focus:outline-none focus:border-zinc-500 disabled:opacity-50 flex-1"
                     >
                       {Object.entries(ROL_LABELS).map(([value, label]) => (
                         <option key={value} value={value}>{label}</option>
                       ))}
                     </select>
-                  </td>
-                  <td className="px-5 py-3.5">
-                    <span className={`text-xs px-2 py-1 rounded-full font-medium ${u.is_active ? 'bg-emerald-500/10 text-emerald-400' : 'bg-zinc-800 text-zinc-500'}`}>
+                    <span className={`text-xs px-2 py-1 rounded-full font-medium shrink-0 ${u.is_active ? 'bg-emerald-500/10 text-emerald-400' : 'bg-zinc-800 text-zinc-500'}`}>
                       {u.is_active ? 'Activo' : 'Inactivo'}
                     </span>
-                  </td>
-                  <td className="px-5 py-3.5">
-                    <button
-                      onClick={() => toggleActivo(u)}
-                      disabled={updating === u.id}
-                      className="text-xs text-zinc-400 hover:text-zinc-200 disabled:opacity-50 transition-colors"
-                    >
-                      {updating === u.id ? 'Guardando...' : u.is_active ? 'Desactivar' : 'Activar'}
-                    </button>
-                  </td>
-                </tr>
+                  </div>
+                  <button
+                    onClick={() => toggleActivo(u)}
+                    disabled={updating === u.id}
+                    className="text-xs text-zinc-400 hover:text-zinc-200 disabled:opacity-50 transition-colors"
+                  >
+                    {updating === u.id ? 'Guardando...' : u.is_active ? 'Desactivar' : 'Activar'}
+                  </button>
+                </div>
               ))}
-            </tbody>
-          </table>
+            </div>
+          </>
         )}
       </div>
 
