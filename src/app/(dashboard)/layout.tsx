@@ -302,20 +302,7 @@ function Topbar({ onMenuClick }: { onMenuClick: () => void }) {
         </button>
         <h1 className="text-sm font-medium text-zinc-200">TechServ</h1>
       </div>
-      <button className="relative p-2 rounded-lg text-zinc-400 hover:text-zinc-200 hover:bg-zinc-800 transition-colors">
-        <svg
-          width="18"
-          height="18"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="1.5"
-        >
-          <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" />
-          <path d="M13.73 21a2 2 0 0 1-3.46 0" />
-        </svg>
-        <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-blue-500 rounded-full" />
-      </button>
+      
     </header>
   );
 }
