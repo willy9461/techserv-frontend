@@ -149,6 +149,7 @@ export default function NuevoTicketPage() {
 
   const direccionCompleta = buildDireccion(form)
   const formValido = form.titulo && form.dir_calle && form.dir_altura && form.dir_localidad
+    && form.equipo_marca && form.equipo_modelo && form.equipo_nro_serie
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -257,17 +258,17 @@ export default function NuevoTicketPage() {
           </div>
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <Label>Marca</Label>
-              <Input value={form.equipo_marca} onChange={set('equipo_marca')} placeholder="Ej: Samsung" />
+              <Label required>Marca</Label>
+              <Input value={form.equipo_marca} onChange={set('equipo_marca')} placeholder="Ej: Samsung" required />
             </div>
             <div>
-              <Label>Modelo</Label>
-              <Input value={form.equipo_modelo} onChange={set('equipo_modelo')} placeholder="Ej: WF45R6100AW" />
+              <Label required>Modelo</Label>
+              <Input value={form.equipo_modelo} onChange={set('equipo_modelo')} placeholder="Ej: WF45R6100AW" required />
             </div>
           </div>
           <div>
-            <Label>N° de serie</Label>
-            <Input value={form.equipo_nro_serie} onChange={set('equipo_nro_serie')} placeholder="Ej: SN-2023-00421" />
+            <Label required>N° de serie</Label>
+            <Input value={form.equipo_nro_serie} onChange={set('equipo_nro_serie')} placeholder="Ej: SN-2023-00421" required />
           </div>
         </div>
 
