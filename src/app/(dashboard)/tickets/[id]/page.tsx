@@ -347,7 +347,7 @@ export default function TicketDetailPage() {
           }}
         />
       )}
-      {!esCliente && !esTecnico && modalEliminar && (
+      {!esTecnico && modalEliminar && (
         <EliminarTicketModal
           onClose={() => setModalEliminar(false)}
           onConfirm={handleEliminar}
@@ -375,32 +375,32 @@ export default function TicketDetailPage() {
             </span>
           </div>
         </div>
-        {!esCliente && (
-          <div className="flex gap-2 sm:shrink-0">
-            {!esTecnico && ticket.estado === 'abierto' && (
-              <button
-                onClick={() => setModalEliminar(true)}
-                className="px-3 py-2 bg-red-500/10 hover:bg-red-500/20 border border-red-500/30 text-red-400 text-sm rounded-lg transition-colors"
-              >
-                Eliminar
-              </button>
-            )}
-            {!esTecnico && (
-              <button
-                onClick={() => setModalTecnico(true)}
-                className="px-3 py-2 bg-zinc-800 hover:bg-zinc-700 border border-zinc-700 text-zinc-300 text-sm rounded-lg transition-colors"
-              >
-                Asignar técnico
-              </button>
-            )}
+        <div className="flex gap-2 sm:shrink-0">
+          {!esTecnico && ticket.estado === 'abierto' && (
+            <button
+              onClick={() => setModalEliminar(true)}
+              className="px-3 py-2 bg-red-500/10 hover:bg-red-500/20 border border-red-500/30 text-red-400 text-sm rounded-lg transition-colors"
+            >
+              Eliminar
+            </button>
+          )}
+          {!esCliente && !esTecnico && (
+            <button
+              onClick={() => setModalTecnico(true)}
+              className="px-3 py-2 bg-zinc-800 hover:bg-zinc-700 border border-zinc-700 text-zinc-300 text-sm rounded-lg transition-colors"
+            >
+              Asignar técnico
+            </button>
+          )}
+          {!esCliente && (
             <button
               onClick={() => setModalEstado(true)}
               className="px-3 py-2 bg-blue-500 hover:bg-blue-400 text-white text-sm font-medium rounded-lg transition-colors"
             >
               Cambiar estado
             </button>
-          </div>
-        )}
+          )}
+        </div>
       </div>
 
       <Section title="Progreso">
